@@ -8,5 +8,5 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.css'
 })
 export class AppComponent {
-  protected readonly title = signal('Dhamnagar Constituency Monitor');
+  protected readonly title = signal('Dhamnagar Development Dashboard (D3)');
 }

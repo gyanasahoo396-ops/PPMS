@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "dhamnagar-monitor": {
+    "dhamnagar-development-dashboard-d3": {
       "projectType": "application",
       "schematics": {},
       "root": "",

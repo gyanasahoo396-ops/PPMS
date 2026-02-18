@@ -1,6 +1,6 @@
 # User Onboarding Guide
 
-This guide explains how to onboard new users to the PPMS (Project Performance Management System) with role-based access control.
+This guide explains how to onboard new users to the D3 (Dhamnagar Development Dashboard) with role-based access control.
 
 ## Prerequisites
 
@@ -174,5 +174,5 @@ Contact the system administrator or check the main project README for more infor
 ---
 
 **Last Updated**: {{ current_date }}
-**System**: PPMS (Project Performance Management System)
+**System**: D3 (Dhamnagar Development Dashboard)
 **Organization**: CSSPL

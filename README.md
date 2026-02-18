@@ -1,4 +1,4 @@
-# Dhamnagar Constituency Project Monitoring System
+# Dhamnagar Development Dashboard (D3)
 
 A comprehensive Angular-based project monitoring dashboard for tracking departmental projects in Dhamnagar constituency.
 

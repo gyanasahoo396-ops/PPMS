@@ -16,7 +16,7 @@
 
 ## Overview
 
-The PPMS (Project Performance Management System) features a complete authentication and authorization system built with Firebase Authentication and Firestore, providing secure, role-based access control.
+The D3 (Dhamnagar Development Dashboard) features a complete authentication and authorization system built with Firebase Authentication and Firestore, providing secure, role-based access control.
 
 ### Key Features
 
@@ -1111,7 +1111,7 @@ Before deploying to production:
 
 ## Support & Contact
 
-**Project**: PPMS (Project Performance Management System)  
+**Project**: D3 (Dhamnagar Development Dashboard)  
 **Organization**: CSSPL  
 **Version**: 1.0  
 **Last Updated**: February 2026
