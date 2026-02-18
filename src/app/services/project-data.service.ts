@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { Project, ProjectStats, DepartmentData, StatusCount } from '../models/project.model';
 
 @Injectable({
@@ -22,9 +21,6 @@ export class ProjectDataService {
         { id: "RD-108", name: "Culvert Construction", dept: "RD", loc: "Aradi Road", cost: 12, spent: 0, physical: 0, status: "Planned", start: "2023-10-01", end: "2024-01-31", priority: false, remarks: "Awaiting administrative approval." },
         { id: "PR-205", name: "Market Complex Development", dept: "PR Block", loc: "Dhusuri", cost: 55, spent: 30, physical: 50, status: "Stuck", start: "2022-11-01", end: "2023-06-30", priority: false, remarks: "Fund shortage reported by agency." },
     ];
-
-    private projectsSubject = new BehaviorSubject<Project[]>(this.projects);
-    public projects$ = this.projectsSubject.asObservable();
 
     constructor() { }
 

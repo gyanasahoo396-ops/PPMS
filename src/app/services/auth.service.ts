@@ -8,7 +8,6 @@ import {
   authState
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { Observable, from } from 'rxjs';
 import { User } from '../models/user.model';
 import { UserService } from './user.service';
 
