@@ -7,14 +7,20 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Return the observable that waits for auth state
+  // Check Firebase auth state which updates immediately after login
   return authService.authState$.pipe(
-    take(1), // Take the first emitted value (completed init)
-    map(user => !!user), // Convert to boolean
+    take(1),
+    tap(user => {
+      console.log('Auth guard checking state:', !!user);
+    }),
+    map(user => !!user),
     tap(loggedIn => {
       if (!loggedIn) {
+        console.log('User not authenticated, redirecting to login');
         // Redirect to login page with return url
         router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+      } else {
+        console.log('User authenticated, allowing access');
       }
     })
   );

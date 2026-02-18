@@ -35,10 +35,19 @@
                         {{ currentUser()!.displayName.charAt(0).toUpperCase() }}
                     </div>
                     <button 
-                        (click)="logout()"
-                        class="p-2 text-slate-500 hover:text-red-600 transition-colors"
+                        (click)="confirmLogout()"
+                        [disabled]="isLoggingOut()"
+                        class="p-2 transition-colors"
+                        [class.text-slate-500]="!isLoggingOut()"
+                        [class.hover:text-red-600]="!isLoggingOut()"
+                        [class.text-gray-400]="isLoggingOut()"
+                        [class.cursor-not-allowed]="isLoggingOut()"
                         title="Logout">
-                        <i class="fa-solid fa-right-from-bracket"></i>
+                        @if (isLoggingOut()) {
+                            <i class="fa-solid fa-spinner animate-spin"></i>
+                        } @else {
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        }
                     </button>
                 </div>
             </div>
@@ -49,4 +58,39 @@
             </div>
         }
     </div>
+
+    <!-- Logout Confirmation Dialog -->
+    @if (showLogoutConfirm()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm mx-4">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                <i class="fa-solid fa-sign-out-alt text-red-600 text-lg"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 text-center mb-2">Sign Out?</h3>
+            <p class="text-sm text-slate-600 text-center mb-6">
+                Are you sure you want to sign out? You'll need to log in again to access the dashboard.
+            </p>
+            <div class="flex gap-3">
+                <button 
+                    (click)="cancelLogout()"
+                    [disabled]="isLoggingOut()"
+                    class="flex-1 px-4 py-2 text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    Cancel
+                </button>
+                <button 
+                    (click)="logout()"
+                    [disabled]="isLoggingOut()"
+                    class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    @if (isLoggingOut()) {
+                        <i class="fa-solid fa-spinner animate-spin"></i>
+                        <span>Signing Out...</span>
+                    } @else {
+                        <i class="fa-solid fa-sign-out-alt"></i>
+                        <span>Sign Out</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+    }
 </header>

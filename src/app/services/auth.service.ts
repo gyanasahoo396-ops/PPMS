@@ -3,12 +3,9 @@ import {
   Auth,
   signInWithEmailAndPassword,
   signOut,
-  user,
-  User as FirebaseUser,
   authState
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { Observable, from } from 'rxjs';
 import { User } from '../models/user.model';
 import { UserService } from './user.service';
 
@@ -24,6 +21,7 @@ export class AuthService {
   currentUser = signal<User | null>(null);
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
+  isAuthenticated = signal(false);
 
   // Firebase auth state observable
   authState$ = authState(this.auth);
@@ -32,10 +30,18 @@ export class AuthService {
     // Subscribe to auth state changes
     this.authState$.subscribe(async (firebaseUser) => {
       if (firebaseUser) {
-        // Fetch user data from Firestore
-        const userData = await this.userService.getUserByUid(firebaseUser.uid);
-        this.currentUser.set(userData);
+        this.isAuthenticated.set(true);
+        try {
+          // Fetch user data from Firestore
+          const userData = await this.userService.getUserByUid(firebaseUser.uid);
+          this.currentUser.set(userData);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          // Still mark as authenticated even if Firestore fetch fails
+          this.currentUser.set(null);
+        }
       } else {
+        this.isAuthenticated.set(false);
         this.currentUser.set(null);
       }
     });
@@ -49,15 +55,23 @@ export class AuthService {
     this.errorMessage.set(null);
 
     try {
+      console.log('Attempting login for:', email);
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      console.log('Login successful, user UID:', userCredential.user.uid);
       
-      // Update last login
-      await this.userService.updateLastLogin(userCredential.user.uid);
+      // Update last login (fire and forget, don't block navigation)
+      this.userService.updateLastLogin(userCredential.user.uid).catch(error => {
+        console.warn('Failed to update last login:', error);
+      });
       
       // Navigate to dashboard
-      await this.router.navigate(['/dashboard']);
+      console.log('Navigating to dashboard...');
+      const navigated = await this.router.navigate(['/dashboard']);
+      console.log('Navigation result:', navigated);
+      this.isLoading.set(false);
     } catch (error: any) {
       console.error('Login error:', error);
+      this.isLoading.set(false);
       
       // Set user-friendly error message
       switch (error.code) {
@@ -79,8 +93,6 @@ export class AuthService {
       }
       
       throw error;
-    } finally {
-      this.isLoading.set(false);
     }
   }
 
@@ -89,20 +101,29 @@ export class AuthService {
    */
   async logout(): Promise<void> {
     try {
-      await signOut(this.auth);
+      console.log('Logging out user...');
+      
+      // Reset all signals immediately to prevent race conditions
+      this.isLoading.set(false);
+      this.errorMessage.set(null);
       this.currentUser.set(null);
+      this.isAuthenticated.set(false);
+      
+      // Sign out from Firebase
+      await signOut(this.auth);
+      console.log('Signed out from Firebase');
+      
+      // Navigate to login page
       await this.router.navigate(['/login']);
+      console.log('Navigated to login page');
     } catch (error) {
       console.error('Logout error:', error);
+      // Still clear auth state even if logout fails
+      this.isLoading.set(false);
+      this.currentUser.set(null);
+      this.isAuthenticated.set(false);
       throw error;
     }
-  }
-
-  /**
-   * Check if user is authenticated
-   */
-  isAuthenticated(): boolean {
-    return this.currentUser() !== null;
   }
 
   /**
