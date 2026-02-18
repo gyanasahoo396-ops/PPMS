@@ -1,29 +1,29 @@
-<header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 md:px-8 z-10">
-    <button class="md:hidden text-slate-600 focus:outline-none" (click)="toggleSidebar()">
+<header class="bg-white shadow-professional h-16 flex items-center justify-between px-4 md:px-8 z-10 border-b border-slate-100">
+    <button class="md:hidden text-slate-600 hover:text-slate-900 focus:outline-none transition-colors" (click)="toggleSidebar()">
         <i class="fa-solid fa-bars text-xl"></i>
     </button>
-    <h2 class="text-xl font-bold text-slate-800">{{ pageTitle }}</h2>
+    <h2 class="text-xl font-bold text-slate-800 tracking-tight">{{ pageTitle }}</h2>
     <div class="flex items-center space-x-4">
-        <button class="p-2 text-slate-400 hover:text-indigo-600 transition-colors relative">
-            <i class="fa-solid fa-bell"></i>
-            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        <button class="p-2.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all relative">
+            <i class="fa-solid fa-bell text-lg"></i>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
         </button>
         
         @if (currentUser()) {
             <div class="flex items-center space-x-3 border-l border-slate-200 pl-4">
                 <!-- User Info -->
                 <div class="text-right hidden sm:block">
-                    <p class="text-sm font-semibold text-slate-700">{{ currentUser()!.displayName }}</p>
+                    <p class="text-sm font-semibold text-slate-800">{{ currentUser()!.displayName }}</p>
                     <div class="flex items-center justify-end space-x-2">
-                        <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                        <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold"
                             [class.bg-purple-100]="currentUser()!.role === 'minister'"
-                            [class.text-purple-700]="currentUser()!.role === 'minister'"
-                            [class.bg-blue-100]="currentUser()!.role === 'admin'"
-                            [class.text-blue-700]="currentUser()!.role === 'admin'"
-                            [class.bg-green-100]="currentUser()!.role === 'manager'"
-                            [class.text-green-700]="currentUser()!.role === 'manager'"
-                            [class.bg-gray-100]="currentUser()!.role === 'viewer'"
-                            [class.text-gray-700]="currentUser()!.role === 'viewer'">
+                            [class.text-purple-800]="currentUser()!.role === 'minister'"
+                            [class.bg-brand-100]="currentUser()!.role === 'admin'"
+                            [class.text-brand-800]="currentUser()!.role === 'admin'"
+                            [class.bg-emerald-100]="currentUser()!.role === 'manager'"
+                            [class.text-emerald-800]="currentUser()!.role === 'manager'"
+                            [class.bg-slate-100]="currentUser()!.role === 'viewer'"
+                            [class.text-slate-700]="currentUser()!.role === 'viewer'">
                             {{ currentUser()!.role.toUpperCase() }}
                         </span>
                     </div>
@@ -31,16 +31,17 @@
                 
                 <!-- User Avatar & Logout -->
                 <div class="flex items-center space-x-2">
-                    <div class="w-9 h-9 rounded-full bg-gradient-to-r from-orange-500 to-blue-600 flex items-center justify-center text-white font-semibold">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
                         {{ currentUser()!.displayName.charAt(0).toUpperCase() }}
                     </div>
                     <button 
                         (click)="confirmLogout()"
                         [disabled]="isLoggingOut()"
-                        class="p-2 transition-colors"
+                        class="p-2.5 rounded-lg transition-all duration-200"
                         [class.text-slate-500]="!isLoggingOut()"
                         [class.hover:text-red-600]="!isLoggingOut()"
-                        [class.text-gray-400]="isLoggingOut()"
+                        [class.hover:bg-red-50]="!isLoggingOut()"
+                        [class.text-slate-400]="isLoggingOut()"
                         [class.cursor-not-allowed]="isLoggingOut()"
                         title="Logout">
                         @if (isLoggingOut()) {
@@ -53,34 +54,34 @@
             </div>
         } @else {
             <div class="text-right hidden sm:block">
-                <p class="text-xs text-slate-500">Last Updated</p>
-                <p class="text-sm font-semibold text-slate-700">{{ currentDate }}</p>
+                <p class="text-xs text-slate-500 font-medium">Last Updated</p>
+                <p class="text-sm font-semibold text-slate-800">{{ currentDate }}</p>
             </div>
         }
     </div>
 
     <!-- Logout Confirmation Dialog -->
     @if (showLogoutConfirm()) {
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm mx-4">
-            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
-                <i class="fa-solid fa-sign-out-alt text-red-600 text-lg"></i>
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+        <div class="bg-white rounded-2xl shadow-professional-xl p-6 max-w-sm mx-4 transform animate-in zoom-in-95 duration-200">
+            <div class="flex items-center justify-center w-14 h-14 mx-auto mb-4 bg-red-100 rounded-full">
+                <i class="fa-solid fa-sign-out-alt text-red-600 text-xl"></i>
             </div>
-            <h3 class="text-lg font-bold text-slate-900 text-center mb-2">Sign Out?</h3>
-            <p class="text-sm text-slate-600 text-center mb-6">
+            <h3 class="text-xl font-bold text-slate-900 text-center mb-2">Sign Out?</h3>
+            <p class="text-sm text-slate-600 text-center mb-6 leading-relaxed">
                 Are you sure you want to sign out? You'll need to log in again to access the dashboard.
             </p>
             <div class="flex gap-3">
                 <button 
                     (click)="cancelLogout()"
                     [disabled]="isLoggingOut()"
-                    class="flex-1 px-4 py-2 text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="flex-1 px-4 py-2.5 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                     Cancel
                 </button>
                 <button 
                     (click)="logout()"
                     [disabled]="isLoggingOut()"
-                    class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm">
                     @if (isLoggingOut()) {
                         <i class="fa-solid fa-spinner animate-spin"></i>
                         <span>Signing Out...</span>

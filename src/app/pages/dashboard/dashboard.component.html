@@ -1,115 +1,116 @@
 <div class="space-y-6">
     <!-- Intro Paragraph -->
-    <div class="bg-white p-4 rounded-lg border-l-4 border-indigo-500 shadow-sm">
-        <p class="text-sm text-slate-600">
-            <strong>Minister's Overview:</strong> This dashboard highlights the financial and physical progress of all
+    <div class="bg-gradient-to-r from-brand-50 to-indigo-50 p-5 rounded-xl border-l-4 border-brand-600 shadow-professional">
+        <p class="text-sm text-slate-700 leading-relaxed">
+            <strong class="text-brand-900">Minister's Overview:</strong> This dashboard highlights the financial and physical progress of all
             departmental projects in Dhamnagar. Focus on the <span class="text-red-600 font-bold">Red Indicators</span>
             below to identify stalled projects requiring immediate intervention.
         </p>
     </div>
 
     <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <!-- Total Projects -->
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
-            <div>
-                <p class="text-sm font-medium text-slate-500">Total Projects</p>
-                <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats().totalProjects }}</h3>
-                <p class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up"></i> 12 New this
-                    month</p>
+        <div class="card-stat hover:scale-[1.02] transform transition-all duration-300 flex justify-between items-start">
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Total Projects</p>
+                <h3 class="text-4xl font-bold text-slate-900 mt-2">{{ stats().totalProjects }}</h3>
+                <p class="text-xs text-emerald-600 mt-2 font-semibold flex items-center">
+                    <i class="fa-solid fa-arrow-up mr-1"></i> 12 New this month
+                </p>
             </div>
-            <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600">
-                <i class="fa-solid fa-layer-group text-xl"></i>
+            <div class="p-4 bg-gradient-to-br from-brand-50 to-brand-100 rounded-xl text-brand-700 shadow-sm">
+                <i class="fa-solid fa-layer-group text-2xl"></i>
             </div>
         </div>
 
         <!-- Financial Utilization -->
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
-            <div>
-                <p class="text-sm font-medium text-slate-500">Funds Utilized</p>
-                <h3 class="text-3xl font-bold text-slate-800 mt-1">₹{{ (stats().totalSpent / 100).toFixed(2) }} Cr</h3>
-                <p class="text-xs text-slate-400 mt-1">out of ₹{{ (stats().totalSanctioned / 100).toFixed(2) }} Cr
+        <div class="card-stat hover:scale-[1.02] transform transition-all duration-300 flex justify-between items-start">
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Funds Utilized</p>
+                <h3 class="text-4xl font-bold text-slate-900 mt-2">₹{{ (stats().totalSpent / 100).toFixed(2) }} Cr</h3>
+                <p class="text-xs text-slate-500 mt-2 font-medium">out of ₹{{ (stats().totalSanctioned / 100).toFixed(2) }} Cr
                     Sanctioned</p>
             </div>
-            <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600">
-                <i class="fa-solid fa-indian-rupee-sign text-xl"></i>
+            <div class="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl text-emerald-700 shadow-sm">
+                <i class="fa-solid fa-indian-rupee-sign text-2xl"></i>
             </div>
         </div>
 
         <!-- Physical Progress -->
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
-            <div>
-                <p class="text-sm font-medium text-slate-500">Avg. Completion</p>
-                <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats().avgProgress }}%</h3>
-                <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
-                    <div class="bg-blue-500 h-1.5 rounded-full" [style.width.%]="stats().avgProgress"></div>
+        <div class="card-stat hover:scale-[1.02] transform transition-all duration-300 flex justify-between items-start">
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Avg. Completion</p>
+                <h3 class="text-4xl font-bold text-slate-900 mt-2">{{ stats().avgProgress }}%</h3>
+                <div class="w-full bg-slate-100 rounded-full h-2 mt-3">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full shadow-sm transition-all duration-500" [style.width.%]="stats().avgProgress"></div>
                 </div>
             </div>
-            <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
-                <i class="fa-solid fa-bars-progress text-xl"></i>
+            <div class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl text-blue-700 shadow-sm">
+                <i class="fa-solid fa-bars-progress text-2xl"></i>
             </div>
         </div>
 
         <!-- Critical Alert -->
-        <div class="bg-red-50 p-5 rounded-xl shadow-sm border border-red-100 flex justify-between items-start cursor-pointer hover:bg-red-100 transition-colors"
+        <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl shadow-professional border-2 border-red-200 flex justify-between items-start cursor-pointer hover:shadow-professional-lg hover:scale-[1.02] transform transition-all duration-300"
             (click)="navigateToStuck()">
-            <div>
-                <p class="text-sm font-bold text-red-600">Attention Required</p>
-                <h3 class="text-3xl font-bold text-red-700 mt-1">{{ stats().stuckCount }}</h3>
-                <p class="text-xs text-red-600 mt-1 font-medium">Projects Stalled / Delayed</p>
+            <div class="flex-1">
+                <p class="text-sm font-bold text-red-700 uppercase tracking-wide">Attention Required</p>
+                <h3 class="text-4xl font-bold text-red-800 mt-2">{{ stats().stuckCount }}</h3>
+                <p class="text-xs text-red-700 mt-2 font-semibold">Projects Stalled / Delayed</p>
             </div>
-            <div class="p-3 bg-white rounded-lg text-red-500 shadow-sm animate-pulse">
-                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            <div class="p-4 bg-white rounded-xl text-red-600 shadow-md animate-pulse">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
             </div>
         </div>
     </div>
 
     <!-- HM Committed Projects - High Visibility Section -->
     @if (hmCommittedProjects().length > 0) {
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-md border-2 border-blue-200 overflow-hidden">
-        <div class="px-6 py-4 border-b-2 border-blue-200 flex justify-between items-center bg-blue-100">
-            <h3 class="text-lg font-bold text-blue-900">
-                <i class="fa-solid fa-crown text-blue-600 mr-2"></i> HM Committed Projects (High Visibility)
+    <div class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-2xl shadow-professional-lg border-2 border-brand-200 overflow-hidden">
+        <div class="px-6 py-5 border-b-2 border-brand-100 flex justify-between items-center bg-gradient-to-r from-brand-50 to-indigo-50">
+            <h3 class="text-lg font-bold text-brand-900 flex items-center">
+                <i class="fa-solid fa-crown text-amber-500 mr-2 text-xl"></i> HM Committed Projects (High Visibility)
             </h3>
-            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">{{ hmCommittedProjects().length }} Projects</span>
+            <span class="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm">{{ hmCommittedProjects().length }} Projects</span>
         </div>
-        <div class="p-0 overflow-x-auto">
+        <div class="p-0 overflow-x-auto custom-scroll">
             <table class="w-full text-left border-collapse">
-                <thead class="bg-blue-50 border-b border-blue-100">
+                <thead class="bg-gradient-to-r from-brand-50 to-indigo-50 border-b-2 border-brand-100">
                     <tr>
-                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Project Name</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Location</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Cost (Cr)</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Progress</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Agency</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold text-blue-900">Status</th>
+                        <th class="px-6 py-4 text-xs font-bold text-brand-900 uppercase tracking-wider">Project Name</th>
+                        <th class="px-6 py-4 text-xs font-bold text-brand-900 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-4 text-xs font-bold text-brand-900 uppercase tracking-wider">Cost (Cr)</th>
+                        <th class="px-6 py-4 text-xs font-bold text-brand-900 uppercase tracking-wider">Progress</th>
+                        <th class="px-6 py-4 text-xs font-bold text-brand-900 uppercase tracking-wider">Agency</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-brand-900 uppercase tracking-wider">Status</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm text-slate-700">
                     @for (project of hmCommittedProjects(); track project.id) {
-                    <tr class="border-b border-blue-100 hover:bg-blue-50 cursor-pointer transition-colors"
+                    <tr class="border-b border-slate-100 table-row-hover transition-all"
                         (click)="openProjectDetails(project.id)">
-                        <td class="px-6 py-4 font-bold text-blue-900">{{ project.name }}</td>
-                        <td class="px-6 py-4 text-slate-600">{{ project.loc }}</td>
-                        <td class="px-6 py-4 font-semibold text-slate-700">₹{{ (project.cost / 100).toFixed(2) }}</td>
+                        <td class="px-6 py-4 font-bold text-brand-900">{{ project.name }}</td>
+                        <td class="px-6 py-4 text-slate-600 font-medium">{{ project.loc }}</td>
+                        <td class="px-6 py-4 font-bold text-slate-800">₹{{ (project.cost / 100).toFixed(2) }}</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
-                                <div class="w-24 bg-slate-200 rounded-full h-2">
-                                    <div class="h-full rounded-full transition-all"
+                                <div class="w-28 bg-slate-200 rounded-full h-2.5 shadow-inner">
+                                    <div class="h-full rounded-full transition-all duration-500"
                                         [style.width.%]="project.physical"
                                         [style.backgroundColor]="getStatusColor(project.status)"></div>
                                 </div>
-                                <span class="text-xs font-semibold text-slate-600 w-8">{{ project.physical }}%</span>
+                                <span class="text-xs font-bold text-slate-700 w-10">{{ project.physical }}%</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-xs text-slate-600">{{ project.executingAgency || '-' }}</td>
+                        <td class="px-6 py-4 text-xs text-slate-600 font-medium">{{ project.executingAgency || '-' }}</td>
                         <td class="px-6 py-4 text-center">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold"
+                            <span class="badge-professional"
                                 [ngClass]="{
-                                'bg-green-100 text-green-800': project.status === 'Completed',
-                                'bg-blue-100 text-blue-800': project.status === 'In Progress',
-                                'bg-red-100 text-red-800': project.status === 'Stuck',
-                                'bg-gray-100 text-gray-800': project.status === 'Planned'
+                                'bg-emerald-100 text-emerald-800 border border-emerald-200': project.status === 'Completed',
+                                'bg-blue-100 text-blue-800 border border-blue-200': project.status === 'In Progress',
+                                'bg-red-100 text-red-800 border border-red-200': project.status === 'Stuck',
+                                'bg-slate-100 text-slate-800 border border-slate-200': project.status === 'Planned'
                             }">
                                 {{ project.status }}
                             </span>
@@ -195,16 +196,22 @@
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Department Performance Chart -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <h3 class="text-lg font-bold text-slate-800 mb-4">Department-wise Expenditure (₹ Lakhs)</h3>
+        <div class="bg-white p-6 rounded-2xl shadow-professional-lg border border-slate-100 hover:shadow-professional-xl transition-shadow duration-300">
+            <h3 class="text-lg font-bold text-slate-900 mb-5 flex items-center">
+                <span class="w-1 h-6 bg-brand-600 rounded-full mr-3"></span>
+                Department-wise Expenditure (₹ Lakhs)
+            </h3>
             <div class="chart-container">
                 <canvas id="deptChart"></canvas>
             </div>
         </div>
 
         <!-- Project Status Distribution -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <h3 class="text-lg font-bold text-slate-800 mb-4">Physical Progress Status</h3>
+        <div class="bg-white p-6 rounded-2xl shadow-professional-lg border border-slate-100 hover:shadow-professional-xl transition-shadow duration-300">
+            <h3 class="text-lg font-bold text-slate-900 mb-5 flex items-center">
+                <span class="w-1 h-6 bg-brand-600 rounded-full mr-3"></span>
+                Physical Progress Status
+            </h3>
             <div class="chart-container">
                 <canvas id="statusChart"></canvas>
             </div>
