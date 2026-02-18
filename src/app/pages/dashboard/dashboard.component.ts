@@ -1,9 +1,9 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import { ProjectDataService } from '../../services/project-data.service';
-import { Project, ProjectStats } from '../../models/project.model';
+import { Project, ProjectStats, RDSchemeData } from '../../models/project.model';
 
 Chart.register(...registerables);
 
@@ -14,16 +14,26 @@ Chart.register(...registerables);
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit, AfterViewInit {
-    stats: ProjectStats = {
+export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
+    stats = signal<ProjectStats>({
         totalProjects: 0,
         totalSanctioned: 0,
         totalSpent: 0,
         stuckCount: 0,
         avgProgress: 0
-    };
+    });
 
-    priorityProjects: Project[] = [];
+    priorityProjects = signal<Project[]>([]);
+    highVisibilityProjects = signal<Project[]>([]);
+    hmCommittedProjects = signal<Project[]>([]);
+    rdSchemeData = signal<RDSchemeData[]>([]);
+
+    // Computed RD totals
+    rdTotalProjects = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.count, 0));
+    rdTotalCost = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.totalCost, 0));
+    rdTotalSpent = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.totalSpent, 0));
+    rdTotalRoadLength = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.totalRoadLength, 0));
+
     deptChart: Chart | null = null;
     statusChart: Chart | null = null;
 
@@ -33,8 +43,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     ) { }
 
     ngOnInit(): void {
-        this.stats = this.projectService.getProjectStats();
-        this.priorityProjects = this.projectService.getPriorityProjects();
+        this.stats.set(this.projectService.getProjectStats());
+        this.priorityProjects.set(this.projectService.getPriorityProjects());
+        this.highVisibilityProjects.set(this.projectService.getHighVisibilityProjects());
+        this.hmCommittedProjects.set(this.projectService.getHMCommittedProjects());
+        this.rdSchemeData.set(this.projectService.getRDSchemeData());
     }
 
     ngAfterViewInit(): void {
@@ -47,6 +60,31 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     openProjectDetails(projectId: string): void {
         this.router.navigate(['/project', projectId]);
+    }
+
+    getStatusColor(status: string): string {
+        switch (status) {
+            case 'In Progress':
+                return '#3b82f6';
+            case 'Completed':
+                return '#10b981';
+            case 'Stuck':
+                return '#ef4444';
+            case 'Planned':
+                return '#9ca3af';
+            default:
+                return '#6b7280';
+        }
+    }
+
+    getVisibilityBadgeColor(visibility?: string): string {
+        if (visibility === 'HM Committed') {
+            return 'bg-blue-100 text-blue-800 border-blue-300';
+        }
+        if (visibility === 'High Visibility') {
+            return 'bg-purple-100 text-purple-800 border-purple-300';
+        }
+        return '';
     }
 
     renderCharts(): void {

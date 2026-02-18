@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 
@@ -13,6 +13,8 @@ export class HeaderComponent implements OnInit {
     
     currentDate: string = '';
     pageTitle: string = 'Dashboard Overview';
+    isLoggingOut = signal(false);
+    showLogoutConfirm = signal(false);
     
     // Get current user from auth service
     currentUser = computed(() => this.authService.currentUser());
@@ -36,11 +38,27 @@ export class HeaderComponent implements OnInit {
         // Emit event to parent or use a service for sidebar toggle
     }
     
+    confirmLogout(): void {
+        this.showLogoutConfirm.set(true);
+    }
+
+    cancelLogout(): void {
+        this.showLogoutConfirm.set(false);
+    }
+    
     async logout(): Promise<void> {
+        this.isLoggingOut.set(true);
+        this.showLogoutConfirm.set(false);
+        
         try {
+            console.log('Header: Initiating logout...');
             await this.authService.logout();
+            console.log('Header: Logout successful!');
         } catch (error) {
             console.error('Logout error:', error);
+            this.isLoggingOut.set(false);
+            // Still attempt navigation in case of error
+            window.location.href = '/login';
         }
     }
 }
