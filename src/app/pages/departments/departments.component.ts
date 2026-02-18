@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectDataService } from '../../services/project-data.service';
 import { Project } from '../../models/project.model';
+import { getStatusClass } from '../../utils/status.utils';
 
 @Component({
     selector: 'app-departments',
@@ -46,14 +47,7 @@ export class DepartmentsComponent implements OnInit {
         );
     }
 
-    getStatusClass(status: string): string {
-        switch (status) {
-            case 'Completed': return 'status-completed';
-            case 'Stuck': return 'status-stuck';
-            case 'Planned': return 'status-planned';
-            default: return 'status-inprogress';
-        }
-    }
+    getStatusClass = getStatusClass;
 
     openProjectDetails(projectId: string): void {
         this.router.navigate(['/project', projectId]);

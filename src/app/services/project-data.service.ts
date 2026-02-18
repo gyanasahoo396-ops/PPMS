@@ -65,9 +65,6 @@ export class ProjectDataService {
         { id: "HM-003", name: "Dhamnagar College - Infrastructure Development", dept: "Education", loc: "Dhamnagar Town", cost: 850, spent: 200, physical: 20, status: "In Progress", start: "2023-04-01", end: "2024-10-31", priority: true, remarks: "Academic block construction planning stage.", visibility: "HM Committed" },
     ];
 
-    private projectsSubject = new BehaviorSubject<Project[]>(this.projects);
-    public projects$ = this.projectsSubject.asObservable();
-
     constructor() { }
 
     getDepartments(): string[] {
