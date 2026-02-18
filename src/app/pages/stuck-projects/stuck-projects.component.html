@@ -1,0 +1,39 @@
+<div class="space-y-6">
+    <div class="bg-red-50 p-6 rounded-xl border border-red-100 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-600 mb-4">
+            <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-red-800">Intervention Needed</h2>
+        <p class="text-red-600 max-w-2xl mx-auto mt-2">
+            The following projects are flagged as "Stalled" or have not reported progress in over 30 days. Direct
+            intervention with the respective department engineer is recommended.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div *ngFor="let project of stuckProjects"
+            class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start mb-4">
+                <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold">{{ project.dept }}</span>
+                <span class="text-red-600 text-xs font-bold uppercase tracking-wide">Alert</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">{{ project.name }}</h3>
+            <p class="text-sm text-slate-500 mb-4">
+                <i class="fa-solid fa-location-dot mr-1"></i> {{ project.loc }}
+            </p>
+
+            <div class="bg-red-50 p-3 rounded-lg border border-red-100 mb-4">
+                <p class="text-xs text-red-800 font-medium">Issue Reported:</p>
+                <p class="text-sm text-red-700 mt-1">{{ project.remarks }}</p>
+            </div>
+
+            <div class="flex justify-between items-center mt-auto pt-4 border-t border-slate-100">
+                <div class="text-xs text-slate-500">Stuck since 20 days</div>
+                <button (click)="openProjectDetails(project.id)"
+                    class="text-sm font-bold text-indigo-600 hover:underline">
+                    View Details
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

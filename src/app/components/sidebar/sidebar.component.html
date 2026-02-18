@@ -1,0 +1,59 @@
+<aside
+  class="w-64 h-full bg-indigo-900 text-white flex-shrink-0 hidden md:flex flex-col transition-all duration-300 z-20">
+  <div class="p-6 border-b border-indigo-800 flex items-center space-x-3">
+    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-indigo-900 font-bold text-xl">
+      <i class="fa-solid fa-landmark"></i>
+    </div>
+    <div>
+      <h1 class="text-lg font-bold leading-tight">Dhamnagar</h1>
+      <p class="text-xs text-indigo-300">Constituency Monitor</p>
+    </div>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto py-4">
+    <ul class="space-y-1 px-3">
+      <li>
+        <a routerLink="/dashboard" routerLinkActive="bg-indigo-800 text-white"
+          class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-indigo-800 transition-colors text-indigo-100">
+          <i class="fa-solid fa-chart-line w-5"></i>
+          <span>HM Decision Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/departments" routerLinkActive="bg-indigo-800 text-white"
+          class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-indigo-800 transition-colors text-indigo-100">
+          <i class="fa-solid fa-building-columns w-5"></i>
+          <span>Department Wise</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/priorities" routerLinkActive="bg-indigo-800 text-white"
+          class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-indigo-800 transition-colors text-indigo-100">
+          <i class="fa-solid fa-star w-5"></i>
+          <span>HM Priorities</span>
+          <span class="ml-auto bg-amber-500 text-xs font-bold px-2 py-0.5 rounded-full text-indigo-900">High Vis</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/stuck" routerLinkActive="bg-indigo-800 text-white"
+          class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-indigo-800 transition-colors text-indigo-100">
+          <i class="fa-solid fa-triangle-exclamation w-5"></i>
+          <span>Intervention Needed</span>
+          <span class="ml-auto bg-red-500 text-xs font-bold px-2 py-0.5 rounded-full text-white">{{ stuckCount }}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="p-4 border-t border-indigo-800">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center">
+        <i class="fa-solid fa-user text-sm"></i>
+      </div>
+      <div>
+        <p class="text-sm font-semibold">Hon'ble Minister</p>
+        <p class="text-xs text-indigo-300">Logged in</p>
+      </div>
+    </div>
+  </div>
+</aside>

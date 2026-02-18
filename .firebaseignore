@@ -1,0 +1,20 @@
+# Firebase
+.firebase/
+.firebaserc
+
+# Build outputs
+dist/
+.angular/
+
+# Node
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

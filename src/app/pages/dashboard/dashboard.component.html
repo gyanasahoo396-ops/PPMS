@@ -1,0 +1,117 @@
+<div class="space-y-6">
+    <!-- Intro Paragraph -->
+    <div class="bg-white p-4 rounded-lg border-l-4 border-indigo-500 shadow-sm">
+        <p class="text-sm text-slate-600">
+            <strong>Minister's Overview:</strong> This dashboard highlights the financial and physical progress of all
+            departmental projects in Dhamnagar. Focus on the <span class="text-red-600 font-bold">Red Indicators</span>
+            below to identify stalled projects requiring immediate intervention.
+        </p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Projects -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
+            <div>
+                <p class="text-sm font-medium text-slate-500">Total Projects</p>
+                <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats.totalProjects }}</h3>
+                <p class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up"></i> 12 New this
+                    month</p>
+            </div>
+            <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600">
+                <i class="fa-solid fa-layer-group text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Financial Utilization -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
+            <div>
+                <p class="text-sm font-medium text-slate-500">Funds Utilized</p>
+                <h3 class="text-3xl font-bold text-slate-800 mt-1">₹{{ (stats.totalSpent / 100).toFixed(2) }} Cr</h3>
+                <p class="text-xs text-slate-400 mt-1">out of ₹{{ (stats.totalSanctioned / 100).toFixed(2) }} Cr
+                    Sanctioned</p>
+            </div>
+            <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600">
+                <i class="fa-solid fa-indian-rupee-sign text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Physical Progress -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
+            <div>
+                <p class="text-sm font-medium text-slate-500">Avg. Completion</p>
+                <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats.avgProgress }}%</h3>
+                <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
+                    <div class="bg-blue-500 h-1.5 rounded-full" [style.width.%]="stats.avgProgress"></div>
+                </div>
+            </div>
+            <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
+                <i class="fa-solid fa-bars-progress text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Critical Alert -->
+        <div class="bg-red-50 p-5 rounded-xl shadow-sm border border-red-100 flex justify-between items-start cursor-pointer hover:bg-red-100 transition-colors"
+            (click)="navigateToStuck()">
+            <div>
+                <p class="text-sm font-bold text-red-600">Attention Required</p>
+                <h3 class="text-3xl font-bold text-red-700 mt-1">{{ stats.stuckCount }}</h3>
+                <p class="text-xs text-red-600 mt-1 font-medium">Projects Stalled / Delayed</p>
+            </div>
+            <div class="p-3 bg-white rounded-lg text-red-500 shadow-sm animate-pulse">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Department Performance Chart -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Department-wise Expenditure (₹ Lakhs)</h3>
+            <div class="chart-container">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Project Status Distribution -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Physical Progress Status</h3>
+            <div class="chart-container">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority Projects Ticker -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-amber-50">
+            <h3 class="text-lg font-bold text-amber-900">
+                <i class="fa-solid fa-star text-amber-500 mr-2"></i> HM Committed Projects (High Priority)
+            </h3>
+            <button routerLink="/priorities" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">View
+                All</button>
+        </div>
+        <div class="p-0 overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <tbody class="text-sm text-slate-700">
+                    <tr *ngFor="let project of priorityProjects"
+                        class="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors"
+                        (click)="openProjectDetails(project.id)">
+                        <td class="px-6 py-3 font-medium text-indigo-900">{{ project.name }}</td>
+                        <td class="px-6 py-3">
+                            <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">{{ project.dept
+                                }}</span>
+                        </td>
+                        <td class="px-6 py-3 text-right font-bold text-xs" [ngClass]="{
+                  'text-red-500': project.status === 'Stuck',
+                  'text-green-600': project.status !== 'Stuck'
+                }">
+                            {{ project.status }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

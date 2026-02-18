@@ -1,0 +1,653 @@
+{
+  "rootFolder": "d:\\Projects\\CSSPL\\ppms",
+  "analyzedAt": "2026-02-18T05:50:40.845Z",
+  "rootStructure": [
+    {
+      "name": ".github",
+      "type": "dir"
+    },
+    {
+      "name": ".gitignore",
+      "type": "file",
+      "size": 767,
+      "lines": 49
+    },
+    {
+      "name": "AGENTS.md",
+      "type": "file",
+      "size": 2403,
+      "lines": 57
+    },
+    {
+      "name": "angular.json",
+      "type": "file",
+      "size": 2229,
+      "lines": 79
+    },
+    {
+      "name": "AUTH_FLOWCHART.md",
+      "type": "file",
+      "size": 16749,
+      "lines": 327
+    },
+    {
+      "name": "AUTH_GUIDE.md",
+      "type": "file",
+      "size": 7633,
+      "lines": 301
+    },
+    {
+      "name": "AUTH_IMPLEMENTATION.md",
+      "type": "file",
+      "size": 9142,
+      "lines": 344
+    },
+    {
+      "name": "create-sample-minister.ps1",
+      "type": "file",
+      "size": 1430,
+      "lines": 40
+    },
+    {
+      "name": "DEPLOYMENT.md",
+      "type": "file",
+      "size": 4440,
+      "lines": 166
+    },
+    {
+      "name": "dist",
+      "type": "dir"
+    },
+    {
+      "name": "firebase.json",
+      "type": "file",
+      "size": 956,
+      "lines": 36
+    },
+    {
+      "name": "node_modules",
+      "type": "dir"
+    },
+    {
+      "name": "onboard-user.mjs",
+      "type": "file",
+      "size": 6060,
+      "lines": 173
+    },
+    {
+      "name": "onboard-user.ps1",
+      "type": "file",
+      "size": 2355,
+      "lines": 69
+    },
+    {
+      "name": "ONBOARDING.md",
+      "type": "file",
+      "size": 4947,
+      "lines": 179
+    },
+    {
+      "name": "package-lock.json",
+      "type": "file",
+      "size": 439854,
+      "lines": 12528
+    },
+    {
+      "name": "package.json",
+      "type": "file",
+      "size": 1280,
+      "lines": 53
+    },
+    {
+      "name": "postcss.config.js",
+      "type": "file",
+      "size": 100,
+      "lines": 7
+    },
+    {
+      "name": "public",
+      "type": "dir"
+    },
+    {
+      "name": "QUICK_REFERENCE.md",
+      "type": "file",
+      "size": 5549,
+      "lines": 205
+    },
+    {
+      "name": "README.md",
+      "type": "file",
+      "size": 1456,
+      "lines": 54
+    },
+    {
+      "name": "README_AUTH.md",
+      "type": "file",
+      "size": 8505,
+      "lines": 336
+    },
+    {
+      "name": "src",
+      "type": "dir"
+    },
+    {
+      "name": "tailwind.config.js",
+      "type": "file",
+      "size": 653,
+      "lines": 26
+    },
+    {
+      "name": "tsconfig.app.json",
+      "type": "file",
+      "size": 444,
+      "lines": 16
+    },
+    {
+      "name": "tsconfig.json",
+      "type": "file",
+      "size": 990,
+      "lines": 34
+    },
+    {
+      "name": "tsconfig.spec.json",
+      "type": "file",
+      "size": 456,
+      "lines": 16
+    }
+  ],
+  "rootFileSnippets": {
+    "AGENTS.md": [
+      "",
+      "You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.",
+      "",
+      "## TypeScript Best Practices",
+      "",
+      "- Use strict type checking",
+      "- Prefer type inference when the type is obvious",
+      "- Avoid the `any` type; use `unknown` when type is uncertain",
+      "",
+      "## Angular Best Practices"
+    ],
+    "angular.json": [
+      "{",
+      "\"$schema\": \"./node_modules/@angular/cli/lib/config/schema.json\",",
+      "\"version\": 1,",
+      "\"cli\": {",
+      "\"packageManager\": \"npm\"",
+      "},",
+      "\"newProjectRoot\": \"projects\",",
+      "\"projects\": {",
+      "\"dhamnagar-monitor\": {",
+      "\"projectType\": \"application\","
+    ],
+    "AUTH_FLOWCHART.md": [
+      "# Authentication Flow Diagram",
+      "",
+      "## Login Flow",
+      "",
+      "```",
+      "┌─────────────────────────────────────────────────────────────────┐",
+      "│                        User Access Flow                         │",
+      "└─────────────────────────────────────────────────────────────────┘",
+      "",
+      "User navigates to any protected route"
+    ],
+    "AUTH_GUIDE.md": [
+      "# Authentication & Authorization Quick Start Guide",
+      "",
+      "## System Overview",
+      "",
+      "The PPMS (Project Performance Management System) now has a complete authentication and authorization system with:",
+      "",
+      "- ✅ Firebase Authentication integration",
+      "- ✅ Firestore user profiles with role-based access",
+      "- ✅ Login screen with CSSPL branding",
+      "- ✅ Route guards for protected pages"
+    ],
+    "AUTH_IMPLEMENTATION.md": [
+      "# 🔐 PPMS Authentication System - Implementation Summary",
+      "",
+      "## ✅ What Has Been Implemented",
+      "",
+      "### 1. Authentication Infrastructure",
+      "",
+      "#### Firebase Integration",
+      "",
+      "- ✅ Firebase Authentication (Email/Password)",
+      "- ✅ Firestore Database for user profiles"
+    ],
+    "create-sample-minister.ps1": [
+      "# Quick Onboard Minister Example",
+      "# This script creates a sample minister user for testing",
+      "",
+      "Write-Host \"🎯 Creating Sample Minister User for PPMS\" -ForegroundColor Cyan",
+      "Write-Host \"==========================================\" -ForegroundColor Cyan",
+      "Write-Host \"\"",
+      "",
+      "# Sample minister credentials",
+      "$email = \"minister@ppms.gov.in\"",
+      "$password = \"Minister@2024!\""
+    ],
+    "DEPLOYMENT.md": [
+      "# Dhamnagar PPMS - Firebase Deployment Guide",
+      "",
+      "## ✅ Build Completed Successfully!",
+      "",
+      "The Angular application has been built successfully and is ready for deployment.",
+      "",
+      "### Build Output",
+      "- **Location**: `dist/dhamnagar-monitor/browser/`",
+      "- **Size**: ~157 KB",
+      "- **Status**: ✅ Production-ready"
+    ],
+    "firebase.json": [
+      "{",
+      "\"hosting\": {",
+      "\"public\": \"dist/dhamnagar-monitor/browser\",",
+      "\"ignore\": [",
+      "\"firebase.json\",",
+      "\"**/.*\",",
+      "\"**/node_modules/**\"",
+      "],",
+      "\"rewrites\": [",
+      "{"
+    ],
+    "onboard-user.mjs": [
+      "/**",
+      "* User Onboarding Script for PPMS",
+      "* This script creates a new user in Firebase Authentication and Firestore",
+      "*",
+      "* Usage:",
+      "*   node onboard-user.mjs <email> <password> <displayName> <role> [department]",
+      "*",
+      "* Example:",
+      "*   node onboard-user.mjs minister@example.com SecurePass123 \"John Doe\" minister \"Finance\"",
+      "*"
+    ],
+    "onboard-user.ps1": [
+      "# User Onboarding Script for PPMS",
+      "# PowerShell wrapper for easy user creation",
+      "",
+      "param(",
+      "[Parameter(Mandatory=$true)]",
+      "[string]$Email,",
+      "",
+      "[Parameter(Mandatory=$true)]",
+      "[string]$Password,",
+      ""
+    ],
+    "ONBOARDING.md": [
+      "# User Onboarding Guide",
+      "",
+      "This guide explains how to onboard new users to the PPMS (Project Performance Management System) with role-based access control.",
+      "",
+      "## Prerequisites",
+      "",
+      "1. **Node.js** installed on your system",
+      "2. **Firebase Admin SDK Key** (service account credentials)",
+      "",
+      "## Getting the Firebase Admin SDK Key"
+    ],
+    "package-lock.json": [
+      "{",
+      "\"name\": \"dhamnagar-monitor\",",
+      "\"version\": \"0.0.0\",",
+      "\"lockfileVersion\": 3,",
+      "\"requires\": true,",
+      "\"packages\": {",
+      "\"\": {",
+      "\"name\": \"dhamnagar-monitor\",",
+      "\"version\": \"0.0.0\",",
+      "\"dependencies\": {"
+    ],
+    "package.json": [
+      "{",
+      "\"name\": \"dhamnagar-monitor\",",
+      "\"version\": \"0.0.0\",",
+      "\"scripts\": {",
+      "\"ng\": \"ng\",",
+      "\"start\": \"ng serve\",",
+      "\"build\": \"ng build\",",
+      "\"watch\": \"ng build --watch --configuration development\",",
+      "\"test\": \"ng test\",",
+      "\"deploy\": \"ng build && npx firebase deploy --only hosting\""
+    ],
+    "postcss.config.js": [
+      "module.exports = {",
+      "plugins: {",
+      "tailwindcss: {},",
+      "autoprefixer: {},",
+      "},",
+      "}",
+      ""
+    ],
+    "QUICK_REFERENCE.md": [
+      "# 🚀 PPMS Authentication - Quick Reference Card",
+      "",
+      "## 📋 Quick Commands",
+      "",
+      "### Create Minister User",
+      "",
+      "```powershell",
+      ".\\create-sample-minister.ps1",
+      "```",
+      ""
+    ],
+    "README.md": [
+      "# Dhamnagar Constituency Project Monitoring System",
+      "",
+      "A comprehensive Angular-based project monitoring dashboard for tracking departmental projects in Dhamnagar constituency.",
+      "",
+      "## Features",
+      "",
+      "### **Dashboard View**",
+      "- KPI cards showing Total Projects, Funds Utilized, Average Completion, and Stuck Projects",
+      "- Department-wise Expenditure Chart (Bar Chart using Chart.js)",
+      "- Physical Progress Status Distribution (Doughnut Chart)"
+    ],
+    "README_AUTH.md": [
+      "# 🎉 PPMS Authentication System - Complete!",
+      "",
+      "## ✅ Implementation Complete",
+      "",
+      "I've successfully implemented a complete authentication system for PPMS with Firebase integration, role-based access control, and user onboarding scripts.",
+      "",
+      "## 📦 What You Received",
+      "",
+      "### 🔐 Core Authentication System",
+      ""
+    ],
+    "tailwind.config.js": [
+      "/** @type {import('tailwindcss').Config} */",
+      "module.exports = {",
+      "content: [",
+      "\"./src/**/*.{html,ts}\",",
+      "],",
+      "theme: {",
+      "extend: {",
+      "colors: {",
+      "'indigo': {",
+      "50: '#eef2ff',"
+    ],
+    "tsconfig.app.json": [
+      "/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */",
+      "/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */",
+      "{",
+      "\"extends\": \"./tsconfig.json\",",
+      "\"compilerOptions\": {",
+      "\"outDir\": \"./out-tsc/app\",",
+      "\"types\": []",
+      "},",
+      "\"include\": [",
+      "\"src/**/*.ts\""
+    ],
+    "tsconfig.json": [
+      "/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */",
+      "/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */",
+      "{",
+      "\"compileOnSave\": false,",
+      "\"compilerOptions\": {",
+      "\"strict\": true,",
+      "\"noImplicitOverride\": true,",
+      "\"noPropertyAccessFromIndexSignature\": true,",
+      "\"noImplicitReturns\": true,",
+      "\"noFallthroughCasesInSwitch\": true,"
+    ],
+    "tsconfig.spec.json": [
+      "/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */",
+      "/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */",
+      "{",
+      "\"extends\": \"./tsconfig.json\",",
+      "\"compilerOptions\": {",
+      "\"outDir\": \"./out-tsc/spec\",",
+      "\"types\": [",
+      "\"vitest/globals\"",
+      "]",
+      "},"
+    ]
+  },
+  "importantFolders": [
+    {
+      "path": "public",
+      "category": "assets",
+      "fileCount": 1
+    },
+    {
+      "path": "src\\app",
+      "category": "frontend",
+      "fileCount": 40,
+      "primaryLanguage": "TypeScript"
+    },
+    {
+      "path": "src\\app\\components",
+      "category": "frontend",
+      "fileCount": 6,
+      "primaryLanguage": "TypeScript"
+    },
+    {
+      "path": "src\\app\\layouts",
+      "category": "build",
+      "fileCount": 3,
+      "primaryLanguage": "TypeScript"
+    },
+    {
+      "path": "src\\app\\layouts\\main-layout",
+      "category": "build",
+      "fileCount": 3,
+      "primaryLanguage": "TypeScript"
+    },
+    {
+      "path": "src\\app\\services",
+      "category": "backend",
+      "fileCount": 3,
+      "primaryLanguage": "TypeScript"
+    }
+  ],
+  "readmeParagraphs": {
+    "root": "# Dhamnagar Constituency Project Monitoring System\r\n\r\nA comprehensive Angular-based project monitoring dashboard for tracking departmental projects in Dhamnagar constituency.\r"
+  },
+  "totals": {
+    "numFiles": 81,
+    "numDirs": 37,
+    "totalSizeBytes": 2026165,
+    "totalLinesOfCode": 1277
+  },
+  "fileCategories": {
+    "other": 33,
+    "documentation": 14,
+    "config": 7,
+    "source": 27
+  },
+  "linesOfCodePerLanguage": {
+    "PowerShell": 109,
+    "JavaScript": 33,
+    "TypeScript": 1135
+  },
+  "filesPerLanguage": {
+    "PowerShell": 2,
+    "JavaScript": 2,
+    "TypeScript": 23
+  },
+  "projectTypes": [
+    "JavaScript/Node.js"
+  ],
+  "frameworks": [
+    "Angular"
+  ],
+  "entryPoints": [],
+  "ciCdTools": [],
+  "packageManagers": [
+    "npm/yarn"
+  ],
+  "topLevelDirectories": [
+    {
+      "name": "src",
+      "numFiles": 45,
+      "totalLoc": 1135,
+      "dominantLanguage": "TypeScript"
+    },
+    {
+      "name": "public",
+      "numFiles": 1,
+      "totalLoc": 0
+    }
+  ],
+  "detailedDirectories": [
+    {
+      "path": "src",
+      "name": "src",
+      "level": 1,
+      "numFiles": 45,
+      "totalLoc": 1135,
+      "dominantLanguage": "TypeScript",
+      "category": "General",
+      "description": "General module with 45 files (TypeScript)",
+      "subdirectories": [
+        {
+          "path": "src\\app",
+          "name": "app",
+          "level": 2,
+          "numFiles": 40,
+          "totalLoc": 1104,
+          "dominantLanguage": "TypeScript",
+          "category": "Application",
+          "description": "Application module with 40 files (TypeScript)",
+          "subdirectories": [
+            {
+              "path": "src\\app\\pages",
+              "name": "pages",
+              "level": 3,
+              "numFiles": 18,
+              "totalLoc": 370,
+              "dominantLanguage": "TypeScript",
+              "category": "General",
+              "description": "General module with 18 files (TypeScript)",
+              "subdirectories": []
+            },
+            {
+              "path": "src\\app\\components",
+              "name": "components",
+              "level": 3,
+              "numFiles": 6,
+              "totalLoc": 74,
+              "dominantLanguage": "TypeScript",
+              "category": "General",
+              "description": "General module with 6 files (TypeScript)",
+              "subdirectories": []
+            },
+            {
+              "path": "src\\app\\models",
+              "name": "models",
+              "level": 3,
+              "numFiles": 2,
+              "totalLoc": 66,
+              "dominantLanguage": "TypeScript",
+              "category": "Models/Entities",
+              "description": "Models/Entities module with 2 files (TypeScript)",
+              "subdirectories": []
+            },
+            {
+              "path": "src\\app\\guards",
+              "name": "guards",
+              "level": 3,
+              "numFiles": 2,
+              "totalLoc": 49,
+              "dominantLanguage": "TypeScript",
+              "category": "General",
+              "description": "General module with 2 files (TypeScript)",
+              "subdirectories": []
+            },
+            {
+              "path": "src\\app\\layouts",
+              "name": "layouts",
+              "level": 3,
+              "numFiles": 3,
+              "totalLoc": 14,
+              "dominantLanguage": "TypeScript",
+              "category": "General",
+              "description": "General module with 3 files (TypeScript)",
+              "subdirectories": []
+            }
+          ]
+        },
+        {
+          "path": "src\\environments",
+          "name": "environments",
+          "level": 2,
+          "numFiles": 2,
+          "totalLoc": 24,
+          "dominantLanguage": "TypeScript",
+          "category": "General",
+          "description": "General module with 2 files (TypeScript)",
+          "subdirectories": []
+        }
+      ]
+    },
+    {
+      "path": "public",
+      "name": "public",
+      "level": 1,
+      "numFiles": 1,
+      "totalLoc": 0,
+      "category": "General",
+      "description": "General module with 1 files",
+      "subdirectories": []
+    }
+  ],
+  "architecturalInsights": {
+    "coreApplications": [],
+    "entryPointDetails": [],
+    "serviceArchitecture": {
+      "microservices": [],
+      "monoliths": [],
+      "libraries": []
+    },
+    "layeredArchitecture": {
+      "presentation": [],
+      "business": [],
+      "data": [],
+      "infrastructure": []
+    }
+  },
+  "largeFiles": [
+    {
+      "path": ".angular\\cache\\21.1.3\\dhamnagar-monitor\\angular-compiler.db",
+      "sizeMb": 1.25
+    }
+  ],
+  "dependencies": {
+    "production": [
+      "@angular/common",
+      "@angular/compiler",
+      "@angular/core",
+      "@angular/fire",
+      "@angular/forms",
+      "@angular/platform-browser",
+      "@angular/router",
+      "@fortawesome/fontawesome-free",
+      "chart.js",
+      "firebase",
+      "rxjs",
+      "tslib"
+    ],
+    "development": [
+      "@angular/build",
+      "@angular/cli",
+      "@angular/compiler-cli",
+      "autoprefixer",
+      "firebase-admin",
+      "jsdom",
+      "postcss",
+      "tailwindcss",
+      "typescript",
+      "vitest"
+    ],
+    "total": 22
+  },
+  "complexity": {
+    "averageFileSize": 15.765432098765432,
+    "maxFileSize": 13107.2,
+    "nestedDepth": 0,
+    "estimatedComplexity": "medium"
+  }
+}
