@@ -176,6 +176,32 @@ export class ProjectDataService {
         return deptData;
     }
 
+    getDepartmentBreakdown(): any[] {
+        const breakdown: any[] = [];
+        
+        this.departments.forEach(dept => {
+            const deptProjects = this.projects.filter(p => p.dept === dept);
+            const totalProjects = deptProjects.length;
+            const onTrack = deptProjects.filter(p => p.status === 'In Progress' || p.status === 'Completed').length;
+            const delayed = deptProjects.filter(p => p.status === 'Stuck').length;
+            const critical = deptProjects.filter(p => p.status === 'Stuck').length;
+            const hmTag = deptProjects.filter(p => p.visibility === 'High Visibility' || p.visibility === 'HM Committed').length;
+            
+            if (totalProjects > 0) {
+                breakdown.push({
+                    dept,
+                    total: totalProjects,
+                    onTrack,
+                    delayed,
+                    critical,
+                    hmTag
+                });
+            }
+        });
+        
+        return breakdown;
+    }
+
     getStatusCounts(): StatusCount {
         const statusCounts: StatusCount = {
             'Completed': 0,

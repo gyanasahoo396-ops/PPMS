@@ -18,9 +18,15 @@ export class HeaderComponent implements OnInit {
     
     // Get current user from auth service
     currentUser = computed(() => this.authService.currentUser());
+    isAuthenticated = computed(() => this.authService.isAuthenticated());
 
     ngOnInit(): void {
         this.updateDate();
+        
+        // Debug: Log auth state changes
+        this.authService.authState$.subscribe(user => {
+            console.log('Header: Auth state changed, user:', user?.email);
+        });
     }
 
     updateDate(): void {

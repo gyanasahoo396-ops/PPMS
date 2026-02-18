@@ -27,12 +27,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     highVisibilityProjects = signal<Project[]>([]);
     hmCommittedProjects = signal<Project[]>([]);
     rdSchemeData = signal<RDSchemeData[]>([]);
+    departmentBreakdown = signal<any[]>([]);
 
     // Computed RD totals
     rdTotalProjects = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.count, 0));
     rdTotalCost = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.totalCost, 0));
     rdTotalSpent = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.totalSpent, 0));
     rdTotalRoadLength = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.totalRoadLength, 0));
+
+    // For template access
+    Math = Math;
 
     deptChart: Chart | null = null;
     statusChart: Chart | null = null;
@@ -48,6 +52,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.highVisibilityProjects.set(this.projectService.getHighVisibilityProjects());
         this.hmCommittedProjects.set(this.projectService.getHMCommittedProjects());
         this.rdSchemeData.set(this.projectService.getRDSchemeData());
+        this.departmentBreakdown.set(this.projectService.getDepartmentBreakdown());
     }
 
     ngAfterViewInit(): void {

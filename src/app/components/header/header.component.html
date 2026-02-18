@@ -9,22 +9,22 @@
             <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
         </button>
         
-        @if (currentUser()) {
+        @if (isAuthenticated() || currentUser()) {
             <div class="flex items-center space-x-3 border-l border-slate-200 pl-4">
                 <!-- User Info -->
                 <div class="text-right hidden sm:block">
-                    <p class="text-sm font-semibold text-slate-800">{{ currentUser()!.displayName }}</p>
+                    <p class="text-sm font-semibold text-slate-800">{{ currentUser()?.displayName || 'Minister' }}</p>
                     <div class="flex items-center justify-end space-x-2">
                         <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold"
-                            [class.bg-purple-100]="currentUser()!.role === 'minister'"
-                            [class.text-purple-800]="currentUser()!.role === 'minister'"
-                            [class.bg-brand-100]="currentUser()!.role === 'admin'"
-                            [class.text-brand-800]="currentUser()!.role === 'admin'"
-                            [class.bg-emerald-100]="currentUser()!.role === 'manager'"
-                            [class.text-emerald-800]="currentUser()!.role === 'manager'"
-                            [class.bg-slate-100]="currentUser()!.role === 'viewer'"
-                            [class.text-slate-700]="currentUser()!.role === 'viewer'">
-                            {{ currentUser()!.role.toUpperCase() }}
+                            [class.bg-purple-100]="currentUser()?.role === 'minister'"
+                            [class.text-purple-800]="currentUser()?.role === 'minister'"
+                            [class.bg-brand-100]="currentUser()?.role === 'admin'"
+                            [class.text-brand-800]="currentUser()?.role === 'admin'"
+                            [class.bg-emerald-100]="currentUser()?.role === 'manager'"
+                            [class.text-emerald-800]="currentUser()?.role === 'manager'"
+                            [class.bg-slate-100]="currentUser()?.role === 'viewer'"
+                            [class.text-slate-700]="currentUser()?.role === 'viewer'">
+                            {{ (currentUser()?.role || 'USER').toUpperCase() }}
                         </span>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                 <!-- User Avatar & Logout -->
                 <div class="flex items-center space-x-2">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
-                        {{ currentUser()!.displayName.charAt(0).toUpperCase() }}
+                        {{ (currentUser()?.displayName || 'M').charAt(0).toUpperCase() }}
                     </div>
                     <button 
                         (click)="confirmLogout()"
