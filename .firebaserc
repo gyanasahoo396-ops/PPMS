@@ -1,7 +1,7 @@
 {
   "projects": {
     "default": "ppms-b8d2b",
-    "dev": "ppms-b8d2b-dev",
+    "dev": "ppms-dev-9361e",
     "prod": "ppms-b8d2b"
   }
 }
