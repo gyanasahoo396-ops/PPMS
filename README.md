@@ -30,6 +30,8 @@ A comprehensive Angular-based project monitoring dashboard for tracking departme
 - **Styling**: Tailwind CSS
 - **Charts**: Chart.js
 - **Icons**: Font Awesome Free
+- **Hosting**: Firebase Hosting (Multi-Environment Setup)
+- **CI/CD**: GitHub Actions
 - **Backend**: Firebase (Authentication & Firestore)
 
 ## Installation
@@ -40,6 +42,30 @@ npm start
 ```
 
 Navigate to `http://localhost:4200`
+
+## Deployment
+
+This project uses a multi-environment Firebase hosting setup with automated CI/CD:
+
+- **Development**: Auto-deploys to `ppms-b8d2b-dev` when pushing to `develop` branch
+- **Production**: Auto-deploys to `ppms-b8d2b` when pushing to `main` branch
+
+### Quick Deployment Commands
+
+```bash
+npm run build:dev        # Build for development
+npm run build:prod       # Build for production
+npm run deploy:dev       # Deploy to development
+npm run deploy:prod      # Deploy to production
+```
+
+### Setup Instructions
+
+For initial setup of CI/CD pipeline, see:
+- 📋 **[SETUP_CHECKLIST.md](SETUP_CHECKLIST.md)** - Quick start checklist
+- 🚀 **[FIREBASE_ENVIRONMENTS_README.md](FIREBASE_ENVIRONMENTS_README.md)** - Overview
+- 📖 **[CI_CD_SETUP.md](CI_CD_SETUP.md)** - Detailed setup guide
+- 📚 **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deployment reference
 
 ## Project Structure
 

@@ -1,5 +1,7 @@
+// Production environment configuration
 export const environment = {
     production: true,
+    environmentName: 'production',
     firebase: {
         apiKey: "AIzaSyD8azzlocIj3Y1tOKRezFqdL3vOI8jPQbU",
         authDomain: "ppms-b8d2b.firebaseapp.com",

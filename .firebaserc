@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "ppms-b8d2b"
+    "default": "ppms-b8d2b",
+    "dev": "ppms-b8d2b-dev",
+    "prod": "ppms-b8d2b"
   }
 }
