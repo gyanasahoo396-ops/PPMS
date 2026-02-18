@@ -1,93 +1,93 @@
 <div class="space-y-6">
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
-        <p class="text-sm text-slate-600">
-            <strong>Department Analysis:</strong> Select a specific department (WR, RD, PWD, etc.) to view all
+    <div class="bg-gradient-to-r from-slate-50 to-slate-100 p-5 rounded-xl shadow-professional border border-slate-200">
+        <p class="text-sm text-slate-700 leading-relaxed">
+            <strong class="text-slate-900 font-bold">Department Analysis:</strong> Select a specific department (WR, RD, PWD, etc.) to view all
             associated projects. Use this view to track granular progress and financial usage per executing agency.
         </p>
     </div>
 
     <!-- Filters -->
     <div
-        class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap gap-4 items-center justify-between">
+        class="bg-white p-5 rounded-xl shadow-professional border border-slate-100 flex flex-wrap gap-4 items-center justify-between">
         <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 custom-scroll w-full md:w-auto">
-            <button (click)="filterProjects('All')" [class.bg-indigo-600]="selectedDept === 'All'"
+            <button (click)="filterProjects('All')" [class.bg-brand-600]="selectedDept === 'All'"
                 [class.text-white]="selectedDept === 'All'" [class.bg-white]="selectedDept !== 'All'"
-                [class.text-slate-600]="selectedDept !== 'All'"
-                class="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 hover:bg-slate-50 transition-all">
+                [class.text-slate-700]="selectedDept !== 'All'"
+                class="flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold border-2 border-slate-200 hover:border-brand-300 hover:bg-slate-50 transition-all shadow-sm">
                 All
             </button>
             <button *ngFor="let dept of departments" (click)="filterProjects(dept)"
-                [class.bg-indigo-600]="selectedDept === dept" [class.text-white]="selectedDept === dept"
-                [class.bg-white]="selectedDept !== dept" [class.text-slate-600]="selectedDept !== dept"
-                class="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 hover:bg-slate-50 transition-all">
+                [class.bg-brand-600]="selectedDept === dept" [class.text-white]="selectedDept === dept"
+                [class.bg-white]="selectedDept !== dept" [class.text-slate-700]="selectedDept !== dept"
+                class="flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold border-2 border-slate-200 hover:border-brand-300 hover:bg-slate-50 transition-all shadow-sm">
                 {{ dept }}
             </button>
         </div>
-        <div class="relative w-full md:w-64">
-            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
+        <div class="relative w-full md:w-72">
+            <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
             <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
                 placeholder="Search projects..."
-                class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm font-medium transition-all">
         </div>
     </div>
 
     <!-- Projects Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="overflow-x-auto">
+    <div class="bg-white rounded-2xl shadow-professional-lg border border-slate-100 overflow-hidden">
+        <div class="overflow-x-auto custom-scroll">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                <thead class="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-700 border-b-2 border-slate-200">
                     <tr>
-                        <th class="px-6 py-4 font-semibold">Project Name & ID</th>
-                        <th class="px-6 py-4 font-semibold">Department</th>
-                        <th class="px-6 py-4 font-semibold">Location</th>
-                        <th class="px-6 py-4 font-semibold text-center">Physical %</th>
-                        <th class="px-6 py-4 font-semibold">Financial (₹)</th>
-                        <th class="px-6 py-4 font-semibold">Status</th>
-                        <th class="px-6 py-4 font-semibold text-center">Action</th>
+                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Project Name & ID</th>
+                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Department</th>
+                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Location</th>
+                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs text-center">Physical %</th>
+                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Financial (₹)</th>
+                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Status</th>
+                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <tr *ngFor="let project of filteredProjects" class="hover:bg-slate-50 transition-colors">
+                    <tr *ngFor="let project of filteredProjects" class="table-row-hover">
                         <td class="px-6 py-4">
-                            <div class="font-medium text-slate-900">{{ project.name }}</div>
-                            <div class="text-xs text-slate-400">ID: {{ project.id }}</div>
+                            <div class="font-semibold text-slate-900">{{ project.name }}</div>
+                            <div class="text-xs text-slate-500 font-medium">ID: {{ project.id }}</div>
                         </td>
-                        <td class="px-6 py-4 text-slate-600">{{ project.dept }}</td>
+                        <td class="px-6 py-4 text-slate-700 font-medium">{{ project.dept }}</td>
                         <td class="px-6 py-4 text-slate-600">{{ project.loc }}</td>
                         <td class="px-6 py-4 text-center">
                             <div class="flex flex-col items-center">
-                                <span class="text-xs font-bold">{{ project.physical }}%</span>
-                                <div class="w-16 bg-slate-200 rounded-full h-1 mt-1">
-                                    <div class="bg-blue-500 h-1 rounded-full" [style.width.%]="project.physical"></div>
+                                <span class="text-xs font-bold text-slate-900">{{ project.physical }}%</span>
+                                <div class="w-16 bg-slate-200 rounded-full h-1.5 mt-1 shadow-inner">
+                                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full shadow-sm transition-all duration-500" [style.width.%]="project.physical"></div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-xs text-slate-400">Exp: <span class="text-slate-700 font-semibold">₹{{
+                            <div class="text-xs text-slate-500 font-medium">Exp: <span class="text-slate-900 font-bold">₹{{
                                     project.spent }}L</span></div>
-                            <div class="text-xs text-slate-400">Est: ₹{{ project.cost }}L</div>
+                            <div class="text-xs text-slate-500">Est: ₹{{ project.cost }}L</div>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 rounded text-xs font-bold"
+                            <span class="badge-professional"
                                 [ngClass]="getStatusClass(project.status)">
                                 {{ project.status }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-center">
                             <button (click)="openProjectDetails(project.id)"
-                                class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                Details
+                                class="text-brand-600 hover:text-brand-800 text-sm font-bold hover:underline transition-colors">
+                                Details <i class="fa-solid fa-arrow-right ml-1"></i>
                             </button>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 text-xs text-slate-500 flex justify-between">
-            <span>Showing {{ filteredProjects.length }} projects</span>
+        <div class="px-6 py-4 border-t-2 border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100 text-xs text-slate-700 flex justify-between items-center">
+            <span class="font-semibold">Showing {{ filteredProjects.length }} projects</span>
             <div class="flex space-x-2">
-                <button class="px-2 py-1 bg-white border rounded hover:bg-slate-100">Prev</button>
-                <button class="px-2 py-1 bg-white border rounded hover:bg-slate-100">Next</button>
+                <button class="px-3 py-1.5 bg-white border-2 border-slate-200 rounded-lg hover:bg-slate-50 hover:border-brand-300 font-semibold transition-all shadow-sm">Prev</button>
+                <button class="px-3 py-1.5 bg-white border-2 border-slate-200 rounded-lg hover:bg-slate-50 hover:border-brand-300 font-semibold transition-all shadow-sm">Next</button>
             </div>
         </div>
     </div>
