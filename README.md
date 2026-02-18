@@ -26,10 +26,11 @@ A comprehensive Angular-based project monitoring dashboard for tracking departme
 
 ## Technology Stack
 
-- **Framework**: Angular 19+ (Standalone Components)
+- **Framework**: Angular 21+ (Standalone Components)
 - **Styling**: Tailwind CSS
 - **Charts**: Chart.js
 - **Icons**: Font Awesome Free
+- **Backend**: Firebase (Authentication & Firestore)
 
 ## Installation
 
@@ -45,9 +46,29 @@ Navigate to `http://localhost:4200`
 ```
 src/app/
 ├── components/  (sidebar, header)
-├── pages/       (dashboard, departments, priorities, stuck-projects, project-detail)
-├── services/    (project-data.service)
-└── models/      (project.model)
+├── guards/      (auth, role guards)
+├── layouts/     (main layout)
+├── pages/       (dashboard, departments, priorities, stuck-projects, project-detail, login)
+├── services/    (auth, user, project-data)
+└── models/      (user, project)
 ```
+
+## Documentation
+
+- **[Authentication Guide](docs/AUTHENTICATION.md)** - Complete authentication & authorization documentation
+- **[Onboarding Guide](ONBOARDING.md)** - User creation and onboarding instructions
+- **[Deployment Guide](DEPLOYMENT.md)** - Firebase deployment instructions
+
+## Authentication & User Management
+
+This system includes role-based access control with four user roles:
+- **Minister** - Highest access level
+- **Admin** - System administration
+- **Manager** - Project management
+- **Viewer** - Read-only access
+
+For detailed authentication setup and user management, see [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md).
+
+---
 
 Developed for Hon'ble Minister, Dhamnagar Constituency

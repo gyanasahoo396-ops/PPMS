@@ -29,6 +29,13 @@ yarn-error.log
 !.vscode/mcp.json
 .history/*
 
+# AI Agent Configurations (use .github/copilot-instructions.md instead)
+.claude/
+.cursor/
+.gemini/
+.junie/
+.windsurf/
+
 # Miscellaneous
 /.angular/cache
 .sass-cache/
@@ -38,6 +45,10 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+
+# Generated/Temporary Files
+overview.json
+overview*.puml
 
 # System files
 .DS_Store
