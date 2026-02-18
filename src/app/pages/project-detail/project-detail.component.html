@@ -1,19 +1,19 @@
 <div *ngIf="project"
-    class="fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+    class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-professional-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border-2 border-slate-200">
 
         <!-- Modal Header -->
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div class="px-6 py-5 border-b-2 border-slate-100 flex justify-between items-center bg-gradient-to-r from-brand-50 to-indigo-50">
             <div>
-                <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">{{ project.dept }}</span>
-                <h2 class="text-xl font-bold text-slate-800">{{ project.name }}</h2>
-                <p class="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                    <i class="fa-solid fa-location-dot"></i> {{ project.loc }}
+                <span class="text-xs font-bold text-brand-700 uppercase tracking-wider bg-brand-100 px-2 py-1 rounded-lg">{{ project.dept }}</span>
+                <h2 class="text-2xl font-bold text-slate-900 mt-2">{{ project.name }}</h2>
+                <p class="text-sm text-slate-600 flex items-center gap-2 mt-1 font-medium">
+                    <i class="fa-solid fa-location-dot text-brand-600"></i> {{ project.loc }}
                 </p>
             </div>
             <button (click)="close()"
-                class="text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 transition-colors">
-                <i class="fa-solid fa-times text-lg"></i>
+                class="text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white transition-all shadow-sm">
+                <i class="fa-solid fa-times text-xl"></i>
             </button>
         </div>
 
@@ -23,59 +23,60 @@
             <!-- Top Details Grid -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <!-- Status Card -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <p class="text-xs text-slate-500 uppercase font-semibold">Physical Status</p>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="px-2 py-1 text-xs font-bold rounded" [ngClass]="getStatusClass(project.status)">
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100 p-5 rounded-2xl border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-xs text-slate-600 uppercase font-bold tracking-wider mb-3">Physical Status</p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <span class="badge-professional" [ngClass]="getStatusClass(project.status)">
                             {{ project.status }}
                         </span>
-                        <span class="text-lg font-bold text-slate-700">{{ project.physical }}%</span>
+                        <span class="text-2xl font-bold text-slate-900">{{ project.physical }}%</span>
                     </div>
-                    <div class="w-full bg-slate-200 rounded-full h-2 mt-2">
-                        <div class="bg-blue-500 h-2 rounded-full" [style.width.%]="project.physical"></div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 mt-3 shadow-inner">
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full shadow-sm transition-all duration-500" [style.width.%]="project.physical"></div>
                     </div>
                 </div>
 
                 <!-- Financial Card -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <p class="text-xs text-slate-500 uppercase font-semibold">Financials</p>
+                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-2xl border-2 border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-xs text-emerald-700 uppercase font-bold tracking-wider mb-3">Financials</p>
                     <div class="flex justify-between items-end mt-2">
                         <div>
-                            <p class="text-xs text-slate-400">Sanctioned</p>
-                            <p class="text-lg font-bold text-slate-800">₹{{ project.cost }}L</p>
+                            <p class="text-xs text-emerald-600 font-semibold">Sanctioned</p>
+                            <p class="text-xl font-bold text-slate-900">₹{{ project.cost }}L</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-xs text-slate-400">Utilized</p>
-                            <p class="text-lg font-bold text-emerald-600">₹{{ project.spent }}L</p>
+                            <p class="text-xs text-emerald-600 font-semibold">Utilized</p>
+                            <p class="text-xl font-bold text-emerald-700">₹{{ project.spent }}L</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Timeline Card -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <p class="text-xs text-slate-500 uppercase font-semibold">Timeline</p>
-                    <div class="mt-2 text-sm space-y-1">
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Start:</span>
-                            <span class="font-medium text-slate-700">{{ project.start }}</span>
+                <div class="bg-gradient-to-br from-brand-50 to-indigo-100 p-5 rounded-2xl border-2 border-brand-200 shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-xs text-brand-700 uppercase font-bold tracking-wider mb-3">Timeline</p>
+                    <div class="mt-2 text-sm space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-brand-600 font-semibold">Start:</span>
+                            <span class="font-bold text-slate-900">{{ project.start }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Target:</span>
-                            <span class="font-medium text-slate-700">{{ project.end }}</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-brand-600 font-semibold">Target:</span>
+                            <span class="font-bold text-slate-900">{{ project.end }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Before/After Photos Section -->
-            <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-camera text-indigo-500"></i> Field Inspection Photos
+            <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+                <span class="w-1.5 h-8 bg-brand-600 rounded-full"></span>
+                <i class="fa-solid fa-camera text-brand-600"></i> Field Inspection Photos
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
                 <!-- Before Photo -->
-                <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-100">
-                    <div class="h-48 bg-slate-200 flex items-center justify-center relative group">
-                        <i class="fa-solid fa-image text-4xl text-slate-300"></i>
+                <div class="border-2 border-slate-200 rounded-2xl overflow-hidden bg-slate-50 shadow-sm hover:shadow-md transition-all">
+                    <div class="h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative group">
+                        <i class="fa-solid fa-image text-5xl text-slate-300"></i>
                         <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all">
                         </div>
                         <div
