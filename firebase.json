@@ -1,6 +1,6 @@
 {
     "hosting": {
-        "public": "dist/dhamnagar-monitor/browser",
+        "public": "dist/dhamnagar-development-dashboard-d3/browser",
         "ignore": [
             "firebase.json",
             "**/.*",
