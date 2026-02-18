@@ -47,7 +47,7 @@ This PR implements a complete multi-environment deployment setup with automated 
           ▼                            ▼
 ┌──────────────────┐        ┌──────────────────┐
 │   Firebase Dev   │        │  Firebase Prod   │
-│  ppms-b8d2b-dev  │        │   ppms-b8d2b     │
+│  ppms-dev-9361e  │        │   ppms-b8d2b     │
 └──────────────────┘        └──────────────────┘
           │                            │
           ▼                            ▼
@@ -57,7 +57,7 @@ This PR implements a complete multi-environment deployment setup with automated 
 ## 🎯 Key Features
 
 ### Two Separate Environments
-- **Development**: For testing and development (`ppms-b8d2b-dev`)
+- **Development**: For testing and development (`ppms-dev-9361e`)
 - **Production**: For live production deployment (`ppms-b8d2b`)
 
 ### Automated CI/CD Pipelines
@@ -126,7 +126,7 @@ See `CI_CD_SETUP.md` for instructions on generating these.
 ## 🌐 Environment URLs
 
 Once set up:
-- **Development**: https://ppms-b8d2b-dev.web.app
+- **Development**: https://ppms-dev-9361e.web.app
 - **Production**: https://ppms-b8d2b.web.app
 
 ## ✅ Testing

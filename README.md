@@ -47,7 +47,7 @@ Navigate to `http://localhost:4200`
 
 This project uses a multi-environment Firebase hosting setup with automated CI/CD:
 
-- **Development**: Auto-deploys to `ppms-b8d2b-dev` when pushing to `develop` branch
+- **Development**: Auto-deploys to `ppms-dev-9361e` when pushing to `develop` branch
 - **Production**: Auto-deploys to `ppms-b8d2b` when pushing to `main` branch
 
 ### Quick Deployment Commands

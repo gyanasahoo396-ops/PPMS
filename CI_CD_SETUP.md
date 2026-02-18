@@ -11,7 +11,7 @@ The project uses GitHub Actions to automatically deploy to two Firebase environm
 ## Prerequisites
 
 1. Two Firebase projects created:
-   - Development: `ppms-b8d2b-dev`
+   - Development: `ppms-dev-9361e`
    - Production: `ppms-b8d2b`
 
 2. GitHub repository with appropriate branch structure:
@@ -25,7 +25,7 @@ The project uses GitHub Actions to automatically deploy to two Firebase environm
 If you haven't already created separate Firebase projects for dev and prod:
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project for development (e.g., `ppms-b8d2b-dev`)
+2. Create a new project for development (e.g., `ppms-dev-9361e`)
 3. Your production project should already exist (`ppms-b8d2b`)
 
 ### Step 2: Generate Firebase Service Accounts
@@ -34,7 +34,7 @@ For each Firebase project, you need to generate a service account:
 
 #### For Development Project:
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your **development project** (`ppms-b8d2b-dev`)
+2. Select your **development project** (`ppms-dev-9361e`)
 3. Click the gear icon ⚙️ → **Project Settings**
 4. Navigate to **Service Accounts** tab
 5. Click **Generate New Private Key**
@@ -106,7 +106,7 @@ Ensure the service accounts have the necessary permissions:
 4. Go to your repository's **Actions** tab on GitHub
 5. You should see a new workflow run: "Deploy to Firebase Dev Environment"
 6. Monitor the workflow execution
-7. Once complete, verify the deployment at: `https://ppms-b8d2b-dev.web.app`
+7. Once complete, verify the deployment at: `https://ppms-dev-9361e.web.app`
 
 ### Test Production Deployment
 
@@ -177,7 +177,7 @@ Both workflows can also be triggered manually:
    ```json
    {
      "projects": {
-       "dev": "ppms-b8d2b-dev",
+       "dev": "ppms-dev-9361e",
        "prod": "ppms-b8d2b"
      }
    }

@@ -8,7 +8,7 @@ This implementation adds support for two separate Firebase environments (develop
 
 ### 1. Firebase Configuration (`.firebaserc`)
 Updated to support two Firebase projects:
-- **dev**: `ppms-b8d2b-dev` (Development environment)
+- **dev**: `ppms-dev-9361e` (Development environment)
 - **prod**: `ppms-b8d2b` (Production environment)
 
 ### 2. Environment Files
@@ -61,8 +61,8 @@ Created comprehensive documentation:
 2. Makes changes and pushes to `develop` branch
 3. GitHub Actions automatically:
    - Builds the application with development configuration
-   - Deploys to `ppms-b8d2b-dev` Firebase project
-4. Changes are live at `https://ppms-b8d2b-dev.web.app`
+   - Deploys to `ppms-dev-9361e` Firebase project
+4. Changes are live at `https://ppms-dev-9361e.web.app`
 
 ### Production Workflow
 1. Developer creates a PR from `develop` to `main`
@@ -79,12 +79,12 @@ Created comprehensive documentation:
 To complete the CI/CD setup, you need to:
 
 1. **Create Firebase Development Project** (if not exists)
-   - Create a new Firebase project named `ppms-b8d2b-dev`
+   - Create a new Firebase project named `ppms-dev-9361e`
    - Enable Firebase Hosting
    - Update the Firebase configuration in `src/environments/environment.ts` with actual dev project credentials
 
 2. **Generate Service Accounts**
-   - Generate service account for dev project (`ppms-b8d2b-dev`)
+   - Generate service account for dev project (`ppms-dev-9361e`)
    - Generate service account for prod project (`ppms-b8d2b`)
    - See detailed instructions in `CI_CD_SETUP.md`
 
@@ -128,7 +128,7 @@ npm run deploy:prod       # Manual deploy to prod (requires Firebase CLI login)
 ## URLs
 
 Once fully set up:
-- **Development**: https://ppms-b8d2b-dev.web.app
+- **Development**: https://ppms-dev-9361e.web.app
 - **Production**: https://ppms-b8d2b.web.app
 
 ## Support

@@ -20,9 +20,9 @@ The Angular application has been built successfully and is ready for deployment.
 ### Firebase Projects
 The application uses two Firebase projects:
 
-1. **Development**: `ppms-b8d2b-dev`
-   - URL: `https://ppms-b8d2b-dev.web.app`
-   - Alternative: `https://ppms-b8d2b-dev.firebaseapp.com`
+1. **Development**: `ppms-dev-9361e`
+   - URL: `https://ppms-dev-9361e.web.app`
+   - Alternative: `https://ppms-dev-9361e.firebaseapp.com`
 
 2. **Production**: `ppms-b8d2b`
    - URL: `https://ppms-b8d2b.web.app`
@@ -33,7 +33,7 @@ The application uses two Firebase projects:
 {
   "projects": {
     "default": "ppms-b8d2b",
-    "dev": "ppms-b8d2b-dev",
+    "dev": "ppms-dev-9361e",
     "prod": "ppms-b8d2b"
   }
 }
@@ -57,7 +57,7 @@ The repository is configured with automated deployments:
 #### Dev Environment
 - **Trigger**: Push to `develop` or `dev` branch
 - **Workflow**: `.github/workflows/deploy-dev.yml`
-- **Target**: Firebase project `ppms-b8d2b-dev`
+- **Target**: Firebase project `ppms-dev-9361e`
 - **Manual Trigger**: Available via GitHub Actions UI
 
 #### Production Environment
@@ -146,7 +146,7 @@ npm run deploy:prod    # Build and deploy to production
 
 ### 1. Firebase Project Access
 Ensure your Firebase account has access to both projects:
-- `ppms-b8d2b-dev` (Development)
+- `ppms-dev-9361e` (Development)
 - `ppms-b8d2b` (Production)
 
 ### 2. Environment Configuration
@@ -169,8 +169,8 @@ Recommended Git workflow:
 
 ### Development Environment
 After successful deployment to dev:
-- **Primary URL**: https://ppms-b8d2b-dev.web.app
-- **Alternative URL**: https://ppms-b8d2b-dev.firebaseapp.com
+- **Primary URL**: https://ppms-dev-9361e.web.app
+- **Alternative URL**: https://ppms-dev-9361e.firebaseapp.com
 
 ### Production Environment
 After successful deployment to production:

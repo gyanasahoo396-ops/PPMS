@@ -15,7 +15,7 @@ Before you begin, ensure you have:
 ### Step 1: Create Firebase Development Project
 - [ ] Go to [Firebase Console](https://console.firebase.google.com/)
 - [ ] Click "Add project" or select existing project
-- [ ] Create/verify project: `ppms-b8d2b-dev`
+- [ ] Create/verify project: `ppms-dev-9361e`
 - [ ] Enable Firebase Hosting for the dev project
 - [ ] Note down the project ID
 
@@ -28,7 +28,7 @@ Before you begin, ensure you have:
 ### Step 3: Generate Firebase Service Accounts
 
 #### For Development Project:
-- [ ] Open Firebase Console → Select `ppms-b8d2b-dev` project
+- [ ] Open Firebase Console → Select `ppms-dev-9361e` project
 - [ ] Go to Project Settings (gear icon) → Service Accounts
 - [ ] Click "Generate New Private Key"
 - [ ] Download and save the JSON file as `firebase-dev-service-account.json`
@@ -88,7 +88,7 @@ Before you begin, ensure you have:
 - [ ] Go to GitHub Actions tab
 - [ ] Verify "Deploy to Firebase Dev Environment" workflow runs
 - [ ] Check workflow logs for any errors
-- [ ] Visit `https://ppms-b8d2b-dev.web.app` to see your changes
+- [ ] Visit `https://ppms-dev-9361e.web.app` to see your changes
 
 ### Step 8: Test Production Deployment
 
@@ -106,8 +106,8 @@ Your CI/CD pipeline is now fully operational. Here's what happens automatically:
 ### Development Flow:
 1. Push to `develop` or `dev` branch
 2. GitHub Actions builds with development config
-3. Auto-deploys to `ppms-b8d2b-dev`
-4. Live at: https://ppms-b8d2b-dev.web.app
+3. Auto-deploys to `ppms-dev-9361e`
+4. Live at: https://ppms-dev-9361e.web.app
 
 ### Production Flow:
 1. Merge PR to `main` or `master` branch
