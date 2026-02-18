@@ -5,9 +5,13 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:dev": "ng build --configuration=development",
+    "build:prod": "ng build --configuration=production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "ng build && npx firebase deploy --only hosting"
+    "deploy": "ng build && npx firebase deploy --only hosting",
+    "deploy:dev": "npm run build:dev && npx firebase deploy --only hosting -P dev",
+    "deploy:prod": "npm run build:prod && npx firebase deploy --only hosting -P prod"
   },
   "prettier": {
     "printWidth": 100,

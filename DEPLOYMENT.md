@@ -1,4 +1,10 @@
-# Dhamnagar PPMS - Firebase Deployment Guide
+# Dhamnagar PPMS - Firebase Multi-Environment Deployment Guide
+
+## 🌍 Multi-Environment Setup
+
+This project is configured with two Firebase environments:
+- **Development (dev)**: For testing and development purposes
+- **Production (prod)**: For live production deployment
 
 ## ✅ Build Completed Successfully!
 
@@ -11,13 +17,24 @@ The Angular application has been built successfully and is ready for deployment.
 
 ## 🔥 Firebase Configuration
 
-All Firebase configuration files have been created:
+### Firebase Projects
+The application uses two Firebase projects:
+
+1. **Development**: `ppms-b8d2b-dev`
+   - URL: `https://ppms-b8d2b-dev.web.app`
+   - Alternative: `https://ppms-b8d2b-dev.firebaseapp.com`
+
+2. **Production**: `ppms-b8d2b`
+   - URL: `https://ppms-b8d2b.web.app`
+   - Alternative: `https://ppms-b8d2b.firebaseapp.com`
 
 ### 1. Firebase Project Configuration (`.firebaserc`)
 ```json
 {
   "projects": {
-    "default": "ppms-b8d2b"
+    "default": "ppms-b8d2b",
+    "dev": "ppms-b8d2b-dev",
+    "prod": "ppms-b8d2b"
   }
 }
 ```
@@ -27,93 +44,136 @@ All Firebase configuration files have been created:
 - Single Page Application routing configured
 - Cache optimization enabled
 
-### 3. Environment Files Created
+### 3. Environment Files
 - `src/environments/environment.ts` (development)
 - `src/environments/environment.prod.ts` (production)
 
-Both contain your Firebase configuration:
-```typescript
-{
-  apiKey: "AIzaSyD8azzlocIj3Y1tOKRezFqdL3vOI8jPQbU",
-  authDomain: "ppms-b8d2b.firebaseapp.com",
-  projectId: "ppms-b8d2b",
-  storageBucket: "ppms-b8d2b.firebasestorage.app",
-  messagingSenderId: "361250131125",
-  appId: "1:361250131125:web:657bf846c213266f7d42fc"
-}
+## 🚀 Deployment Methods
+
+### Method 1: Automated CI/CD with GitHub Actions (Recommended)
+
+The repository is configured with automated deployments:
+
+#### Dev Environment
+- **Trigger**: Push to `develop` or `dev` branch
+- **Workflow**: `.github/workflows/deploy-dev.yml`
+- **Target**: Firebase project `ppms-b8d2b-dev`
+- **Manual Trigger**: Available via GitHub Actions UI
+
+#### Production Environment
+- **Trigger**: Push to `main` or `master` branch
+- **Workflow**: `.github/workflows/deploy-prod.yml`
+- **Target**: Firebase project `ppms-b8d2b`
+- **Manual Trigger**: Available via GitHub Actions UI
+
+#### Setup Requirements for CI/CD
+1. **Firebase Service Accounts**: Generate service accounts for both projects
+   - Go to Firebase Console → Project Settings → Service Accounts
+   - Generate new private key for each project
+   
+2. **GitHub Secrets**: Add the following secrets to your repository:
+   - `FIREBASE_SERVICE_ACCOUNT_DEV`: Service account JSON for dev project
+   - `FIREBASE_SERVICE_ACCOUNT_PROD`: Service account JSON for prod project
+   
+   To add secrets:
+   - Go to repository Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Add each secret with the appropriate name and JSON content
+
+### Method 2: Manual Deployment via Firebase CLI
+
+**You need to login with an account that has access to both Firebase projects.**
+
+#### Deploy to Development
+```bash
+npm run deploy:dev
+```
+or
+```bash
+npm run build:dev
+npx firebase deploy --only hosting -P dev
 ```
 
-## 🚀 Deployment Steps
+#### Deploy to Production
+```bash
+npm run deploy:prod
+```
+or
+```bash
+npm run build:prod
+npx firebase deploy --only hosting -P prod
+```
 
-### Option 1: Using Firebase CLI (Recommended)
+#### First-time Firebase Login
+```bash
+npx firebase login
+```
 
-**You need to login with an account that has access to the `ppms-b8d2b` Firebase project.**
-
-1. **Login to Firebase** (with the correct account):
-   ```bash
-   npx firebase login
-   ```
-   
-2. **Deploy to Firebase Hosting**:
-   ```bash
-   npx firebase deploy --only hosting
-   ```
-
-3. **Your app will be live at**:
-   - **URL**: `https://ppms-b8d2b.web.app`
-   - **Alternative**: `https://ppms-b8d2b.firebaseapp.com`
-
-### Option 2: Manual Deployment via Firebase Console
+### Method 3: Manual Deployment via Firebase Console
 
 If you don't have CLI access:
 
-1. Go to [Firebase Console](https://console.firebase.google.com/project/ppms-b8d2b/hosting)
-2. Navigate to **Hosting** section
-3. Click **"Add another site"** or use the existing site
-4. Upload the contents of `dist/dhamnagar-monitor/browser/` directory
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select the appropriate project (dev or prod)
+3. Navigate to **Hosting** section
+4. Click **"Add another site"** or use the existing site
+5. Upload the contents of `dist/dhamnagar-monitor/browser/` directory
 
-### Option 3: Deploy Script
+## 📦 Available npm Scripts
 
-I've created a deployment script for you:
-
+### Build Commands
 ```bash
-npm run deploy
+npm run build          # Build with default configuration (production)
+npm run build:dev      # Build for development environment
+npm run build:prod     # Build for production environment
 ```
 
-## 📦 Quick Commands
-
-### Build for Production
+### Development
 ```bash
-npm run build
+npm start              # Start development server
+npm run watch          # Watch mode with development configuration
+npm test               # Run tests
 ```
 
-### Serve Locally
+### Deployment
 ```bash
-npm start
-```
-
-### Deploy to Firebase
-```bash
-npm run deploy
+npm run deploy         # Build and deploy to default project
+npm run deploy:dev     # Build and deploy to development
+npm run deploy:prod    # Build and deploy to production
 ```
 
 ## 🔐 Important Notes
 
-1. **Account Permissions**: The currently logged-in Firebase account (`jsfusionlabs@gmail.com`) does not have access to the `ppms-b8d2b` project. You need to either:
-   - Add this account as a collaborator in Firebase Console
-   - Login with the account that owns the ppms-b8d2b project
-   - Use a service account with deployment permissions
+### 1. Firebase Project Access
+Ensure your Firebase account has access to both projects:
+- `ppms-b8d2b-dev` (Development)
+- `ppms-b8d2b` (Production)
 
-2. **Build Output**: The production build is located at:
-   ```
-   d:\Projects\CSSPL\ppms\dist\dhamnagar-monitor\browser\
-   ```
+### 2. Environment Configuration
+Each environment has its own Firebase configuration:
+- **Development**: Uses `environment.ts` with dev project credentials
+- **Production**: Uses `environment.prod.ts` with prod project credentials
 
-3. **Deployment Size**: ~157 KB (optimized for production)
+### 3. Deployment Permissions
+For CI/CD deployments:
+- Service accounts must have "Firebase Hosting Admin" role
+- GitHub repository must have the service account secrets configured
 
-## 🌐 Post-Deployment
+### 4. Branch Strategy
+Recommended Git workflow:
+- `develop/dev` branch → Development environment
+- `main/master` branch → Production environment
+- Feature branches → Local testing only
 
-After successful deployment, your application will be available at:
+## 🌐 Post-Deployment URLs
+
+### Development Environment
+After successful deployment to dev:
+- **Primary URL**: https://ppms-b8d2b-dev.web.app
+- **Alternative URL**: https://ppms-b8d2b-dev.firebaseapp.com
+
+### Production Environment
+After successful deployment to production:
 - **Primary URL**: https://ppms-b8d2b.web.app
 - **Alternative URL**: https://ppms-b8d2b.firebaseapp.com
 
@@ -132,7 +192,7 @@ After successful deployment, your application will be available at:
 ## 🛠️ Troubleshooting
 
 ### Permission Denied Error
-**Solution**: This happens when the logged-in account does not have access to the project `ppms-b8d2b`.
+**Solution**: This happens when the logged-in account does not have access to the Firebase project.
 
 1. Logout of the current session:
    ```bash
@@ -146,20 +206,55 @@ After successful deployment, your application will be available at:
 
 3. Re-run deployment:
    ```bash
-   npm run deploy
+   npm run deploy:dev  # or deploy:prod
    ```
+
+### CI/CD Pipeline Failures
+
+#### Missing Service Account Secret
+**Error**: `Error: Input required and not supplied: firebaseServiceAccount`
+
+**Solution**: Add the required service account secret to GitHub repository:
+1. Generate service account key from Firebase Console
+2. Add as GitHub secret (`FIREBASE_SERVICE_ACCOUNT_DEV` or `FIREBASE_SERVICE_ACCOUNT_PROD`)
+
+#### Build Failures
+**Error**: Build errors during CI/CD
+
+**Solution**: 
+1. Test build locally first: `npm run build:dev` or `npm run build:prod`
+2. Ensure all dependencies are in `package.json` (not devDependencies)
+3. Check workflow logs in GitHub Actions tab
+
+### Wrong Environment Deployed
+**Issue**: Development build deployed to production
+
+**Solution**: 
+- Always use the correct npm script
+- For production: Use `npm run deploy:prod` or push to `main/master` branch
+- For development: Use `npm run deploy:dev` or push to `develop/dev` branch
 
 ### Bundle Size Warnings
 We've optimized the build configuration (`angular.json`) to allow up to:
-- **1MB** for initial bundle warning (previously 500kB)
+- **1MB** for initial bundle warning
 - **2MB** for error limit
 
-This accommodates the application's size (~600kB total) without warnings.
-
 ### 404 Errors After Deployment
-The `firebase.json` configuration includes URL rewrites for SPA routing, so this should not occur.
+The `firebase.json` configuration includes URL rewrites for SPA routing, so this should not occur. If it does:
+1. Verify `firebase.json` has the rewrite rules
+2. Ensure the build output directory is correct
+3. Clear browser cache and try again
+
+## 🚦 CI/CD Workflow Status
+
+You can monitor deployment status:
+1. Go to repository's **Actions** tab on GitHub
+2. View workflow runs for each deployment
+3. Check logs for any errors or warnings
 
 ---
 
 **Need Help?** 
-Contact the Firebase project owner to grant deployment permissions or manually upload the `dist/dhamnagar-monitor/browser` folder to Firebase Hosting.
+- For Firebase access: Contact the Firebase project owner
+- For CI/CD issues: Check GitHub Actions logs
+- For build problems: Run builds locally first to debug
