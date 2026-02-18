@@ -14,7 +14,7 @@
         <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
             <div>
                 <p class="text-sm font-medium text-slate-500">Total Projects</p>
-                <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats.totalProjects }}</h3>
+                <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats().totalProjects }}</h3>
                 <p class="text-xs text-green-600 mt-1 font-medium"><i class="fa-solid fa-arrow-up"></i> 12 New this
                     month</p>
             </div>
@@ -27,8 +27,8 @@
         <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
             <div>
                 <p class="text-sm font-medium text-slate-500">Funds Utilized</p>
-                <h3 class="text-3xl font-bold text-slate-800 mt-1">₹{{ (stats.totalSpent / 100).toFixed(2) }} Cr</h3>
-                <p class="text-xs text-slate-400 mt-1">out of ₹{{ (stats.totalSanctioned / 100).toFixed(2) }} Cr
+                <h3 class="text-3xl font-bold text-slate-800 mt-1">₹{{ (stats().totalSpent / 100).toFixed(2) }} Cr</h3>
+                <p class="text-xs text-slate-400 mt-1">out of ₹{{ (stats().totalSanctioned / 100).toFixed(2) }} Cr
                     Sanctioned</p>
             </div>
             <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600">
@@ -40,9 +40,9 @@
         <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex justify-between items-start">
             <div>
                 <p class="text-sm font-medium text-slate-500">Avg. Completion</p>
-                <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats.avgProgress }}%</h3>
+                <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats().avgProgress }}%</h3>
                 <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
-                    <div class="bg-blue-500 h-1.5 rounded-full" [style.width.%]="stats.avgProgress"></div>
+                    <div class="bg-blue-500 h-1.5 rounded-full" [style.width.%]="stats().avgProgress"></div>
                 </div>
             </div>
             <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
@@ -55,7 +55,7 @@
             (click)="navigateToStuck()">
             <div>
                 <p class="text-sm font-bold text-red-600">Attention Required</p>
-                <h3 class="text-3xl font-bold text-red-700 mt-1">{{ stats.stuckCount }}</h3>
+                <h3 class="text-3xl font-bold text-red-700 mt-1">{{ stats().stuckCount }}</h3>
                 <p class="text-xs text-red-600 mt-1 font-medium">Projects Stalled / Delayed</p>
             </div>
             <div class="p-3 bg-white rounded-lg text-red-500 shadow-sm animate-pulse">
@@ -63,6 +63,134 @@
             </div>
         </div>
     </div>
+
+    <!-- HM Committed Projects - High Visibility Section -->
+    @if (hmCommittedProjects().length > 0) {
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-md border-2 border-blue-200 overflow-hidden">
+        <div class="px-6 py-4 border-b-2 border-blue-200 flex justify-between items-center bg-blue-100">
+            <h3 class="text-lg font-bold text-blue-900">
+                <i class="fa-solid fa-crown text-blue-600 mr-2"></i> HM Committed Projects (High Visibility)
+            </h3>
+            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">{{ hmCommittedProjects().length }} Projects</span>
+        </div>
+        <div class="p-0 overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-blue-50 border-b border-blue-100">
+                    <tr>
+                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Project Name</th>
+                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Location</th>
+                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Cost (Cr)</th>
+                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Progress</th>
+                        <th class="px-6 py-3 text-xs font-semibold text-blue-900">Agency</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-blue-900">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm text-slate-700">
+                    @for (project of hmCommittedProjects(); track project.id) {
+                    <tr class="border-b border-blue-100 hover:bg-blue-50 cursor-pointer transition-colors"
+                        (click)="openProjectDetails(project.id)">
+                        <td class="px-6 py-4 font-bold text-blue-900">{{ project.name }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ project.loc }}</td>
+                        <td class="px-6 py-4 font-semibold text-slate-700">₹{{ (project.cost / 100).toFixed(2) }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-24 bg-slate-200 rounded-full h-2">
+                                    <div class="h-full rounded-full transition-all"
+                                        [style.width.%]="project.physical"
+                                        [style.backgroundColor]="getStatusColor(project.status)"></div>
+                                </div>
+                                <span class="text-xs font-semibold text-slate-600 w-8">{{ project.physical }}%</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-600">{{ project.executingAgency || '-' }}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold"
+                                [ngClass]="{
+                                'bg-green-100 text-green-800': project.status === 'Completed',
+                                'bg-blue-100 text-blue-800': project.status === 'In Progress',
+                                'bg-red-100 text-red-800': project.status === 'Stuck',
+                                'bg-gray-100 text-gray-800': project.status === 'Planned'
+                            }">
+                                {{ project.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+
+    <!-- RD Schemes Overview -->
+    @if (rdSchemeData().length > 0) {
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-emerald-50">
+            <h3 class="text-lg font-bold text-emerald-900">
+                <i class="fa-solid fa-road text-emerald-600 mr-2"></i> Rural Development (RD) - Scheme Verticals
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @for (scheme of rdSchemeData(); track scheme.schemeName) {
+                <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-200 hover:shadow-md transition-shadow">
+                    <h4 class="text-sm font-bold text-emerald-900 mb-2 line-clamp-2">{{ scheme.schemeName }}</h4>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-emerald-700">Projects:</span>
+                            <span class="font-bold text-emerald-900">{{ scheme.count }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-emerald-700">Road Length:</span>
+                            <span class="font-bold text-emerald-900">{{ scheme.totalRoadLength.toFixed(2) }} km</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-emerald-700">Total Cost:</span>
+                            <span class="font-bold text-emerald-900">₹{{ (scheme.totalCost / 100).toFixed(2) }} Cr</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-emerald-700">Spent:</span>
+                            <span class="font-bold text-emerald-900">₹{{ (scheme.totalSpent / 100).toFixed(2) }} Cr</span>
+                        </div>
+                        <div class="border-t border-emerald-200 pt-2 mt-2">
+                            <div class="flex gap-1 text-xs">
+                                <span class="flex-1 text-center px-1 py-1 rounded bg-green-100 text-green-700 font-semibold">{{ scheme.statusBreakdown['Completed'] }} C</span>
+                                <span class="flex-1 text-center px-1 py-1 rounded bg-blue-100 text-blue-700 font-semibold">{{ scheme.statusBreakdown['In Progress'] }} IP</span>
+                                <span class="flex-1 text-center px-1 py-1 rounded bg-red-100 text-red-700 font-semibold">{{ scheme.statusBreakdown['Stuck'] }} S</span>
+                                <span class="flex-1 text-center px-1 py-1 rounded bg-gray-100 text-gray-700 font-semibold">{{ scheme.statusBreakdown['Planned'] }} P</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+            
+            <!-- RD Summary Card -->
+            @if (rdSchemeData().length > 0) {
+            <div class="mt-6 bg-gradient-to-r from-emerald-100 to-teal-100 p-6 rounded-lg border-2 border-emerald-300">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center">
+                        <p class="text-sm text-emerald-700 font-semibold">Total Projects</p>
+                        <p class="text-3xl font-bold text-emerald-900">{{ rdTotalProjects() }}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-emerald-700 font-semibold">Total Road Length</p>
+                        <p class="text-3xl font-bold text-emerald-900">{{ rdTotalRoadLength().toFixed(2) }} <span class="text-sm">km</span></p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-emerald-700 font-semibold">Total Cost</p>
+                        <p class="text-3xl font-bold text-emerald-900">₹{{ (rdTotalCost() / 100).toFixed(2) }} <span class="text-sm">Cr</span></p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-emerald-700 font-semibold">Alloc. (Lakhs)</p>
+                        <p class="text-3xl font-bold text-emerald-900">{{ rdTotalCost().toFixed(0) }}</p>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    }
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -83,11 +211,12 @@
         </div>
     </div>
 
-    <!-- Priority Projects Ticker -->
+    <!-- All Priority Projects Ticker -->
+    @if (priorityProjects().length > 0) {
     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-amber-50">
             <h3 class="text-lg font-bold text-amber-900">
-                <i class="fa-solid fa-star text-amber-500 mr-2"></i> HM Committed Projects (High Priority)
+                <i class="fa-solid fa-star text-amber-500 mr-2"></i> All Priority Projects
             </h3>
             <button routerLink="/priorities" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">View
                 All</button>
@@ -95,10 +224,18 @@
         <div class="p-0 overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <tbody class="text-sm text-slate-700">
-                    <tr *ngFor="let project of priorityProjects"
-                        class="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors"
+                    @for (project of priorityProjects(); track project.id) {
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors"
                         (click)="openProjectDetails(project.id)">
-                        <td class="px-6 py-3 font-medium text-indigo-900">{{ project.name }}</td>
+                        <td class="px-6 py-3 font-medium text-indigo-900 flex-1">
+                            {{ project.name }}
+                            @if (project.visibility) {
+                            <span class="ml-2 text-xs font-bold px-2 py-0.5 rounded-full border"
+                                [ngClass]="getVisibilityBadgeColor(project.visibility)">
+                                {{ project.visibility }}
+                            </span>
+                            }
+                        </td>
                         <td class="px-6 py-3">
                             <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">{{ project.dept
                                 }}</span>
@@ -110,8 +247,10 @@
                             {{ project.status }}
                         </td>
                     </tr>
+                    }
                 </tbody>
             </table>
         </div>
     </div>
+    }
 </div>

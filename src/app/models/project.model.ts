@@ -11,6 +11,11 @@ export interface Project {
     end: string;
     priority: boolean;
     remarks: string;
+    scheme?: string; // RD scheme category
+    visibility?: 'High Visibility' | 'HM Committed'; // Special tag
+    executingAgency?: string; // For high visibility projects
+    roadLength?: number; // Road length in km
+    division?: string; // RD Division
 }
 
 export interface ProjectStats {
@@ -30,4 +35,17 @@ export interface StatusCount {
     'In Progress': number;
     'Stuck': number;
     'Planned': number;
+}
+
+export interface RDSchemeData {
+    schemeName: string;
+    count: number;
+    totalCost: number;
+    totalSpent: number;
+    totalRoadLength: number; // Total road length in km
+    statusBreakdown: StatusCount;
+}
+
+export interface VisibilityProject extends Project {
+    visibility: 'High Visibility' | 'HM Committed';
 }

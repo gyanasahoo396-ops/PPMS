@@ -47,13 +47,15 @@ export class LoginComponent {
     const { email, password } = this.loginForm.value;
 
     try {
+      console.log('Login component: Starting login process...');
       await this.authService.login(email, password);
-      
-      // Get return URL from route parameters or default to dashboard
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-      await this.router.navigateByUrl(returnUrl);
+      console.log('Login component: Login successful!');
+      // Navigation is handled by auth service, no need to navigate again
     } catch (error: any) {
+      console.error('Login component: Login failed:', error);
       this.errorMessage.set(this.authService.errorMessage());
+    } finally {
+      console.log('Login component: Resetting loading state');
       this.isLoading.set(false);
     }
   }
