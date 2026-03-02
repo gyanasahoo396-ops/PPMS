@@ -1,94 +1,229 @@
-<div class="space-y-6">
-    <div class="bg-gradient-to-r from-slate-50 to-slate-100 p-5 rounded-xl shadow-professional border border-slate-200">
-        <p class="text-sm text-slate-700 leading-relaxed">
-            <strong class="text-slate-900 font-bold">Department Analysis:</strong> Select a specific department (WR, RD, PWD, etc.) to view all
-            associated projects. Use this view to track granular progress and financial usage per executing agency.
+<div class="dept-wise-layout">
+
+  <!-- ===== LEFT PANEL: Department List ===== -->
+  <aside class="dept-sidebar">
+    <div class="dept-sidebar-header">
+      <i class="fa-solid fa-building-columns"></i>
+      <span>Departments</span>
+      <span class="dept-count-pill">{{ departments.length }}</span>
+    </div>
+    <ul class="dept-list">
+      <li *ngFor="let dept of departments"
+          (click)="selectDepartment(dept)"
+          [class.active]="selectedDept?.name === dept.name"
+          class="dept-list-item">
+        <div class="dept-item-icon" [ngClass]="getDeptBg(dept.color)">
+          <i [class]="dept.icon"></i>
+        </div>
+        <div class="dept-item-info">
+          <span class="dept-item-name">{{ dept.name }}</span>
+          <span class="dept-item-meta">{{ dept.schemes.length }} schemes</span>
+        </div>
+        <i class="fa-solid fa-chevron-right dept-item-arrow"></i>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- ===== RIGHT PANEL: Scheme Cards ===== -->
+  <main class="dept-content" *ngIf="selectedDept">
+
+    <!-- Header -->
+    <div class="scheme-panel-header">
+      <div class="scheme-panel-title-row">
+        <div class="scheme-dept-icon-lg" [ngClass]="getDeptBg(selectedDept.color)">
+          <i [class]="selectedDept.icon"></i>
+        </div>
+        <div>
+          <h2 class="scheme-panel-title">{{ selectedDept.name }}</h2>
+          <p class="scheme-panel-subtitle">Department-wide scheme overview · Click a card to view projects</p>
+        </div>
+      </div>
+
+      <!-- Summary strip -->
+      <div class="scheme-summary-strip">
+        <div class="summary-chip">
+          <span class="summary-chip-label">Schemes</span>
+          <span class="summary-chip-value">{{ totalSchemes }}</span>
+        </div>
+        <div class="summary-chip">
+          <span class="summary-chip-label">Projects</span>
+          <span class="summary-chip-value">{{ totalProjects }}</span>
+        </div>
+        <div class="summary-chip">
+          <span class="summary-chip-label">Total Cost</span>
+          <span class="summary-chip-value">₹{{ totalCost.toFixed(2) }} Cr</span>
+        </div>
+        <div class="summary-chip">
+          <span class="summary-chip-label">Spent</span>
+          <span class="summary-chip-value">₹{{ totalSpent.toFixed(2) }} Cr</span>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="scheme-search-wrap">
+        <i class="fa-solid fa-magnifying-glass scheme-search-icon"></i>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search schemes…"
+               class="scheme-search-input" id="scheme-search" />
+        <span class="scheme-search-count" *ngIf="searchQuery">{{ filteredSchemes.length }} results</span>
+      </div>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="scheme-cards-grid">
+      <div *ngFor="let scheme of filteredSchemes; let i = index"
+           class="scheme-card"
+           [ngClass]="getDeptBg(selectedDept.color)"
+           [class.has-projects]="scheme.projects > 0"
+           (click)="openSchemeDrawer(scheme)"
+           [attr.id]="'scheme-card-' + i">
+
+        <!-- Card header -->
+        <div class="scheme-card-header">
+          <span class="scheme-serial">{{ i + 1 }}</span>
+          <h3 class="scheme-card-title">{{ scheme.name }}</h3>
+          <i class="fa-solid fa-arrow-up-right-from-square scheme-card-link-icon"
+             *ngIf="scheme.projects > 0" title="View project list"></i>
+        </div>
+
+        <!-- Stats rows -->
+        <div class="scheme-stats">
+          <div class="scheme-stat-row">
+            <span class="stat-label">Projects:</span>
+            <span class="stat-value">{{ scheme.projects }}</span>
+          </div>
+          <div class="scheme-stat-row" *ngIf="scheme.roadLength !== undefined">
+            <span class="stat-label">Road Length:</span>
+            <span class="stat-value bold">{{ scheme.roadLength!.toFixed(2) }} km</span>
+          </div>
+          <div class="scheme-stat-row">
+            <span class="stat-label">Total Cost:</span>
+            <span class="stat-value bold">₹{{ scheme.totalCost.toFixed(2) }} Cr</span>
+          </div>
+          <div class="scheme-stat-row">
+            <span class="stat-label">Spent:</span>
+            <span class="stat-value bold">₹{{ scheme.spent.toFixed(2) }} Cr</span>
+          </div>
+        </div>
+
+        <!-- Status pills -->
+        <div class="scheme-status-pills">
+          <span class="pill pill-completed"  title="Completed">{{ scheme.completed }} C</span>
+          <span class="pill pill-inprogress" title="In Progress">{{ scheme.inProgress }} IP</span>
+          <span class="pill pill-stuck"      title="Stuck">{{ scheme.stuck }} S</span>
+          <span class="pill pill-planned"    title="Planned">{{ scheme.planned }} P</span>
+        </div>
+
+        <!-- "View projects" hint shown only on hover when list exists -->
+        <div class="scheme-card-hint" *ngIf="scheme.projects > 0">
+          <i class="fa-solid fa-table-list"></i> View {{ scheme.projects }} project{{ scheme.projects > 1 ? 's' : '' }}
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="scheme-empty" *ngIf="filteredSchemes.length === 0">
+        <i class="fa-solid fa-magnifying-glass text-3xl mb-3 opacity-30"></i>
+        <p>No schemes match "<strong>{{ searchQuery }}</strong>"</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ================================================================
+     SLIDE-OVER DRAWER: Project List
+     ================================================================ -->
+
+<!-- Backdrop -->
+<div class="drawer-backdrop"
+     [class.open]="drawerOpen"
+     (click)="closeDrawer()">
+</div>
+
+<!-- Drawer panel -->
+<div class="drawer-panel"
+     [class.open]="drawerOpen"
+     *ngIf="drawerScheme">
+
+  <!-- Drawer header -->
+  <div class="drawer-header" [ngClass]="drawerDept ? getDeptBg(drawerDept.color) : ''">
+    <div class="drawer-header-inner">
+      <div>
+        <p class="drawer-dept-label">{{ drawerDept!.name }}</p>
+        <h2 class="drawer-scheme-title">{{ drawerScheme!.name }}</h2>
+        <p class="drawer-year-label">
+          <i class="fa-solid fa-calendar-days mr-1"></i>
+          Dhamnagar Assembly Constituency · 2025-26
         </p>
+      </div>
+      <button class="drawer-close-btn" (click)="closeDrawer()" id="drawer-close-btn">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
 
-    <!-- Filters -->
-    <div
-        class="bg-white p-5 rounded-xl shadow-professional border border-slate-100 flex flex-wrap gap-4 items-center justify-between">
-        <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 custom-scroll w-full md:w-auto">
-            <button (click)="filterProjects('All')" [class.bg-brand-600]="selectedDept === 'All'"
-                [class.text-white]="selectedDept === 'All'" [class.bg-white]="selectedDept !== 'All'"
-                [class.text-slate-700]="selectedDept !== 'All'"
-                class="flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold border-2 border-slate-200 hover:border-brand-300 hover:bg-slate-50 transition-all shadow-sm">
-                All
-            </button>
-            <button *ngFor="let dept of departments" (click)="filterProjects(dept)"
-                [class.bg-brand-600]="selectedDept === dept" [class.text-white]="selectedDept === dept"
-                [class.bg-white]="selectedDept !== dept" [class.text-slate-700]="selectedDept !== dept"
-                class="flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold border-2 border-slate-200 hover:border-brand-300 hover:bg-slate-50 transition-all shadow-sm">
-                {{ dept }}
-            </button>
-        </div>
-        <div class="relative w-full md:w-72">
-            <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
-            <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
-                placeholder="Search projects..."
-                class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm font-medium transition-all">
-        </div>
+    <!-- Summary pills inside header -->
+    <div class="drawer-header-pills">
+      <div class="drawer-pill">
+        <i class="fa-solid fa-list-ol"></i>
+        <span>{{ drawerScheme!.projects }} Projects</span>
+      </div>
+      <div class="drawer-pill" *ngIf="drawerScheme!.roadLength! > 0">
+        <i class="fa-solid fa-ruler-horizontal"></i>
+        <span>{{ drawerScheme!.roadLength!.toFixed(2) }} km Total</span>
+      </div>
+      <div class="drawer-pill">
+        <i class="fa-solid fa-indian-rupee-sign"></i>
+        <span>₹{{ (drawerTotalCostLakh / 100).toFixed(2) }} Cr Approx. Cost</span>
+      </div>
     </div>
+  </div>
 
-    <!-- Projects Table -->
-    <div class="bg-white rounded-2xl shadow-professional-lg border border-slate-100 overflow-hidden">
-        <div class="overflow-x-auto custom-scroll">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-700 border-b-2 border-slate-200">
-                    <tr>
-                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Project Name & ID</th>
-                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Department</th>
-                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Location</th>
-                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs text-center">Physical %</th>
-                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Financial (₹)</th>
-                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Status</th>
-                        <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    <tr *ngFor="let project of filteredProjects" class="table-row-hover">
-                        <td class="px-6 py-4">
-                            <div class="font-semibold text-slate-900">{{ project.name }}</div>
-                            <div class="text-xs text-slate-500 font-medium">ID: {{ project.id }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-slate-700 font-medium">{{ project.dept }}</td>
-                        <td class="px-6 py-4 text-slate-600">{{ project.loc }}</td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="flex flex-col items-center">
-                                <span class="text-xs font-bold text-slate-900">{{ project.physical }}%</span>
-                                <div class="w-16 bg-slate-200 rounded-full h-1.5 mt-1 shadow-inner">
-                                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full shadow-sm transition-all duration-500" [style.width.%]="project.physical"></div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-xs text-slate-500 font-medium">Exp: <span class="text-slate-900 font-bold">₹{{
-                                    project.spent }}L</span></div>
-                            <div class="text-xs text-slate-500">Est: ₹{{ project.cost }}L</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="badge-professional"
-                                [ngClass]="getStatusClass(project.status)">
-                                {{ project.status }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <button (click)="openProjectDetails(project.id)"
-                                class="text-brand-600 hover:text-brand-800 text-sm font-bold hover:underline transition-colors">
-                                Details <i class="fa-solid fa-arrow-right ml-1"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="px-6 py-4 border-t-2 border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100 text-xs text-slate-700 flex justify-between items-center">
-            <span class="font-semibold">Showing {{ filteredProjects.length }} projects</span>
-            <div class="flex space-x-2">
-                <button class="px-3 py-1.5 bg-white border-2 border-slate-200 rounded-lg hover:bg-slate-50 hover:border-brand-300 font-semibold transition-all shadow-sm">Prev</button>
-                <button class="px-3 py-1.5 bg-white border-2 border-slate-200 rounded-lg hover:bg-slate-50 hover:border-brand-300 font-semibold transition-all shadow-sm">Next</button>
-            </div>
-        </div>
+  <!-- Drawer body: project table -->
+  <div class="drawer-body" *ngIf="drawerScheme!.projectList?.length; else noProjects">
+    <div class="drawer-table-wrap">
+      <table class="drawer-table" id="scheme-projects-table">
+        <thead>
+          <tr>
+            <th class="col-sl">Sl.</th>
+            <th class="col-road">{{ drawerScheme!.roadLength !== undefined ? 'Name of the Road' : 'Project / Scheme Name' }}</th>
+            <th class="col-dist">District</th>
+            <th class="col-div">Division / Block</th>
+            <th class="col-len" *ngIf="drawerScheme!.roadLength !== undefined">Length (km)</th>
+            <th class="col-cost">Approx. Cost (₹ Lakh)</th>
+            <th class="col-status">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let proj of drawerScheme!.projectList; let j = index"
+              [class.row-alt]="j % 2 !== 0">
+            <td class="col-sl td-center">{{ proj.slNo }}</td>
+            <td class="col-road td-road">{{ proj.roadName }}</td>
+            <td class="col-dist td-center">{{ proj.district }}</td>
+            <td class="col-div td-center">{{ proj.division }}</td>
+            <td class="col-len td-center td-bold" *ngIf="drawerScheme!.roadLength !== undefined">{{ proj.lengthKm?.toFixed(2) ?? '–' }}</td>
+            <td class="col-cost td-center td-bold">{{ proj.costLakh.toFixed(2) }}</td>
+            <td class="col-status td-center">
+              <span class="badge-professional" [ngClass]="getStatusClass(proj.status)">
+                {{ proj.status ?? 'Planned' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="table-total-row">
+            <td [attr.colspan]="drawerScheme!.roadLength !== undefined ? 4 : 4" class="td-total-label">Total</td>
+            <td class="td-center td-bold" *ngIf="drawerScheme!.roadLength !== undefined">{{ drawerTotalLength.toFixed(2) }} km</td>
+            <td class="td-center td-bold">₹{{ drawerTotalCostLakh.toFixed(2) }} L</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
+  </div>
+
+  <ng-template #noProjects>
+    <div class="drawer-empty">
+      <i class="fa-solid fa-folder-open"></i>
+      <p>No project data available yet for this scheme.</p>
+      <span>Data will be added as projects are sanctioned.</span>
+    </div>
+  </ng-template>
 </div>

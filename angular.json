@@ -62,10 +62,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "dhamnagar-monitor:build:production"
+              "buildTarget": "dhamnagar-development-dashboard-d3:build:production"
             },
             "development": {
-              "buildTarget": "dhamnagar-monitor:build:development"
+              "buildTarget": "dhamnagar-development-dashboard-d3:build:development"
             }
           },
           "defaultConfiguration": "development"
