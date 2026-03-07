@@ -6,6 +6,7 @@ import { PrioritiesComponent } from './pages/priorities/priorities.component';
 import { StuckProjectsComponent } from './pages/stuck-projects/stuck-projects.component';
 import { ProjectDetailComponent } from './pages/project-detail/project-detail.component';
 import { LoginComponent } from './pages/login/login.component';
+import { InterventionProjectsComponent } from './pages/intervention-projects/intervention-projects.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -20,6 +21,7 @@ export const routes: Routes = [
             { path: 'departments', component: DepartmentsComponent },
             { path: 'priorities', component: PrioritiesComponent },
             { path: 'stuck', component: StuckProjectsComponent },
+            { path: 'intervention', component: InterventionProjectsComponent },
             { path: 'project/:id', component: ProjectDetailComponent }
         ]
     },

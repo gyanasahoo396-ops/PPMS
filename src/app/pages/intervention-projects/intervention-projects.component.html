@@ -1,0 +1,120 @@
+<div class="space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button
+                (click)="goBack()"
+                class="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors"
+                aria-label="Back to Dashboard">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Dashboard</span>
+            </button>
+            <span class="text-slate-300">/</span>
+            <h1 class="text-lg font-bold text-slate-800">Projects Requiring Intervention</h1>
+        </div>
+        <span class="text-xs text-slate-400 font-medium">
+            {{ projects().length }} project{{ projects().length === 1 ? '' : 's' }} found
+        </span>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="flex gap-3 w-full">
+        @for (filter of filters; track filter.key) {
+        <button
+            (click)="setFilter(filter.key)"
+            class="flex flex-1 items-center justify-center gap-2 px-4 py-2.5 rounded-lg border font-medium text-sm transition-all"
+            [class]="activeFilter() === filter.key
+                ? filter.headerBg + ' ' + filter.headerText + ' border-transparent shadow-md'
+                : filter.badgeBg + ' ' + filter.badgeText + ' hover:shadow-sm'"
+            [attr.aria-current]="activeFilter() === filter.key ? 'page' : null">
+            <i [class]="filter.icon"></i>
+            <span>{{ filter.label }}</span>
+        </button>
+        }
+    </div>
+
+    <!-- Active Filter Description -->
+    <div class="flex items-start gap-3 px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-600">
+        <i [class]="activeConfig().icon + ' mt-0.5 text-slate-400'"></i>
+        <span>{{ activeConfig().description }}</span>
+    </div>
+
+    <!-- Project Table -->
+    @if (projects().length > 0) {
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-6 py-4 border-b flex justify-between items-center" [class]="activeConfig().headerBg">
+            <h2 class="font-bold flex items-center gap-2" [class]="activeConfig().headerText">
+                <i [class]="activeConfig().icon"></i>
+                {{ activeConfig().label }}
+            </h2>
+            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-white/20" [class]="activeConfig().headerText">
+                {{ projects().length }} Projects
+            </span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">#</th>
+                        <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Project Name</th>
+                        <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Dept</th>
+                        <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Cost (₹ Cr)</th>
+                        <th class="px-6 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Progress</th>
+                        <th class="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (project of projects(); track project.id; let i = $index) {
+                    <tr
+                        class="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors"
+                        (click)="openProject(project.id)"
+                        tabindex="0"
+                        (keydown.enter)="openProject(project.id)"
+                        [attr.aria-label]="'View details for ' + project.name">
+                        <td class="px-6 py-4 text-slate-400 font-medium text-xs">{{ i + 1 }}</td>
+                        <td class="px-6 py-4">
+                            <span class="font-semibold text-slate-800">{{ project.name }}</span>
+                            @if (project.visibility) {
+                            <span class="ml-2 text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">
+                                {{ project.visibility }}
+                            </span>
+                            }
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-medium">{{ project.dept }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 text-xs">{{ project.loc }}</td>
+                        <td class="px-6 py-4 font-bold text-slate-800">₹{{ (project.cost / 100).toFixed(2) }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
+                                    <div
+                                        class="h-full rounded-full transition-all duration-500"
+                                        [style.width.%]="project.physical"
+                                        [style.backgroundColor]="getProgressColor(project.physical)">
+                                    </div>
+                                </div>
+                                <span class="text-xs font-bold text-slate-700 w-8">{{ project.physical }}%</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="text-xs font-semibold px-2 py-1 rounded" [class]="getStatusClass(project.status)">
+                                {{ project.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    } @else {
+    <div class="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-slate-100 text-slate-400">
+        <i class="fa-solid fa-circle-check text-4xl mb-3 text-emerald-300"></i>
+        <p class="font-semibold text-slate-600">No projects in this category</p>
+        <p class="text-sm mt-1">All projects are on track</p>
+    </div>
+    }
+</div>
