@@ -1,4 +1,4 @@
-<div class="dept-wise-layout">
+<div class="dept-wise-layout" [class.mobile-show-content]="mobileShowContent">
 
   <!-- ===== LEFT PANEL: Department List ===== -->
   <aside class="dept-sidebar">
@@ -30,6 +30,10 @@
     <!-- Header -->
     <div class="scheme-panel-header">
       <div class="scheme-panel-title-row">
+        <!-- Mobile Back Button -->
+        <button class="dept-mobile-back" (click)="mobileGoBack()" aria-label="Back to department list">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
         <div class="scheme-dept-icon-lg" [ngClass]="getDeptBg(selectedDept.color)">
           <i [class]="selectedDept.icon"></i>
         </div>
@@ -56,6 +60,10 @@
         <div class="summary-chip">
           <span class="summary-chip-label">Spent</span>
           <span class="summary-chip-value">₹{{ totalSpent.toFixed(2) }} Cr</span>
+        </div>
+        <div class="summary-chip">
+          <span class="summary-chip-label">% Spent</span>
+          <span class="summary-chip-value">{{ spentPercentage.toFixed(1) }}%</span>
         </div>
       </div>
 

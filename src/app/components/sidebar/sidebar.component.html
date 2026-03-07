@@ -1,19 +1,31 @@
 <aside
-  class="w-64 h-full bg-gradient-to-b from-brand-900 to-indigo-950 text-white flex-shrink-0 hidden md:flex flex-col transition-all duration-300 z-20 shadow-professional-xl">
+  class="h-full bg-gradient-to-b from-brand-900 to-indigo-950 text-white flex-shrink-0 flex flex-col transition-transform duration-300 z-40 shadow-professional-xl"
+  [class.sidebar-open]="isOpen"
+  [class.sidebar-closed]="!isOpen">
+
+  <!-- Sidebar Header -->
   <div class="p-6 border-b border-white/10 flex items-center space-x-3">
-    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-brand-700 font-bold text-xl shadow-lg">
+    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-brand-700 font-bold text-xl shadow-lg flex-shrink-0">
       <i class="fa-solid fa-landmark"></i>
     </div>
-    <div>
-      <h1 class="text-lg font-bold leading-tight tracking-tight">Dhamnagar</h1>
+    <div class="min-w-0">
+      <h1 class="text-lg font-bold leading-tight tracking-tight truncate">Dhamnagar</h1>
       <p class="text-xs text-brand-200">Constituency Monitor</p>
     </div>
+    <!-- Close button (mobile only) -->
+    <button
+      class="ml-auto md:hidden text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
+      (click)="closeSidebar.emit()"
+      aria-label="Close sidebar">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
   </div>
 
   <nav class="flex-1 overflow-y-auto py-4 custom-scroll">
     <ul class="space-y-1.5 px-3">
       <li>
         <a routerLink="/dashboard" routerLinkActive="bg-white/10 text-white shadow-sm"
+          (click)="onLinkClick()"
           class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-brand-100 hover:text-white group">
           <i class="fa-solid fa-chart-line w-5 group-hover:scale-110 transition-transform"></i>
           <span class="font-medium">HM Decision Dashboard</span>
@@ -21,6 +33,7 @@
       </li>
       <li>
         <a routerLink="/departments" routerLinkActive="bg-white/10 text-white shadow-sm"
+          (click)="onLinkClick()"
           class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-brand-100 hover:text-white group">
           <i class="fa-solid fa-building-columns w-5 group-hover:scale-110 transition-transform"></i>
           <span class="font-medium">Department Wise</span>
@@ -28,6 +41,7 @@
       </li>
       <li>
         <a routerLink="/priorities" routerLinkActive="bg-white/10 text-white shadow-sm"
+          (click)="onLinkClick()"
           class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-brand-100 hover:text-white group">
           <i class="fa-solid fa-star w-5 group-hover:scale-110 transition-transform"></i>
           <span class="font-medium">HM Priorities</span>
@@ -35,6 +49,7 @@
       </li>
       <li>
         <a routerLink="/intervention" routerLinkActive="bg-white/10 text-white shadow-sm"
+          (click)="onLinkClick()"
           class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-brand-100 hover:text-white group">
           <i class="fa-solid fa-flag w-5 group-hover:scale-110 transition-transform"></i>
           <span class="font-medium">Projects Requiring Intervention</span>
@@ -42,6 +57,7 @@
       </li>
       <li>
         <a routerLink="/stuck" routerLinkActive="bg-white/10 text-white shadow-sm"
+          (click)="onLinkClick()"
           class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-brand-100 hover:text-white group">
           <i class="fa-solid fa-triangle-exclamation w-5 group-hover:scale-110 transition-transform"></i>
           <span class="font-medium">Intervention Needed</span>
@@ -64,7 +80,7 @@
           <p class="text-xs text-brand-200 truncate">{{ currentUser()!.role.toUpperCase() }}</p>
         </div>
       </div>
-      
+
       <!-- Logout Button -->
       <button
         (click)="logout()"

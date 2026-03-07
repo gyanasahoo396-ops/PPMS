@@ -15,6 +15,9 @@ export class DepartmentsComponent implements OnInit {
     selectedDept: DepartmentEntry | null = null;
     searchQuery: string = '';
 
+    // Mobile panel state – show content panel on mobile
+    mobileShowContent: boolean = false;
+
     // Drawer state
     drawerOpen: boolean = false;
     drawerScheme: SchemeCard | null = null;
@@ -33,6 +36,11 @@ export class DepartmentsComponent implements OnInit {
         this.selectedDept = dept;
         this.searchQuery = '';
         this.closeDrawer();
+        this.mobileShowContent = true; // switch to content panel on mobile
+    }
+
+    mobileGoBack(): void {
+        this.mobileShowContent = false;
     }
 
     get filteredSchemes(): SchemeCard[] {
@@ -46,6 +54,10 @@ export class DepartmentsComponent implements OnInit {
     get totalProjects(): number { return this.selectedDept?.schemes.reduce((s, sc) => s + sc.projects, 0) ?? 0; }
     get totalCost(): number    { return this.selectedDept?.schemes.reduce((s, sc) => s + sc.totalCost, 0) ?? 0; }
     get totalSpent(): number   { return this.selectedDept?.schemes.reduce((s, sc) => s + sc.spent, 0) ?? 0; }
+    get spentPercentage(): number {
+        const cost = this.totalCost;
+        return cost > 0 ? (this.totalSpent / cost) * 100 : 0;
+    }
 
     /** Scheme card click → open drawer */
     openSchemeDrawer(scheme: SchemeCard): void {

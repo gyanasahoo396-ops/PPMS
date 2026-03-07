@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed, signal } from '@angular/core';
+import { Component, OnInit, inject, computed, signal, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 
@@ -9,20 +9,22 @@ import { AuthService } from '../../services/auth.service';
     styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
+    @Output() toggleSidebar = new EventEmitter<void>();
+
     private authService = inject(AuthService);
-    
+
     currentDate: string = '';
     pageTitle: string = 'Dashboard Overview';
     isLoggingOut = signal(false);
     showLogoutConfirm = signal(false);
-    
+
     // Get current user from auth service
     currentUser = computed(() => this.authService.currentUser());
     isAuthenticated = computed(() => this.authService.isAuthenticated());
 
     ngOnInit(): void {
         this.updateDate();
-        
+
         // Debug: Log auth state changes
         this.authService.authState$.subscribe(user => {
             console.log('Header: Auth state changed, user:', user?.email);
@@ -40,10 +42,10 @@ export class HeaderComponent implements OnInit {
         this.currentDate = now.toLocaleDateString('en-IN', options);
     }
 
-    toggleSidebar(): void {
-        // Emit event to parent or use a service for sidebar toggle
+    onToggleSidebar(): void {
+        this.toggleSidebar.emit();
     }
-    
+
     confirmLogout(): void {
         this.showLogoutConfirm.set(true);
     }
@@ -51,11 +53,11 @@ export class HeaderComponent implements OnInit {
     cancelLogout(): void {
         this.showLogoutConfirm.set(false);
     }
-    
+
     async logout(): Promise<void> {
         this.isLoggingOut.set(true);
         this.showLogoutConfirm.set(false);
-        
+
         try {
             console.log('Header: Initiating logout...');
             await this.authService.logout();
