@@ -1,0 +1,74 @@
+<div class="home-container">
+    <!-- Header with navbar -->
+    <header class="navbar-header">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <i class="fa-solid fa-landmark"></i>
+                <div class="brand-text">
+                    <span class="brand-name">Dhamnagar</span>
+                    <span class="brand-subtitle">Constituency Monitor</span>
+                </div>
+            </div>
+            <div class="navbar-actions" *ngIf="isAuthenticated()">
+                <div class="user-section" *ngIf="currentUser()">
+                    <span class="user-name">{{ currentUser()?.displayName || currentUser()?.email }}</span>
+                </div>
+                <button class="logout-btn" (click)="logout()" title="Logout">
+                    <i class="fa-solid fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <!-- Welcome section -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">Project & Programme Management System</h1>
+            <p class="welcome-subtitle">Dhamnagar Assembly Constituency</p>
+        </div>
+
+        <!-- Cards container -->
+        <div class="cards-container">
+            <!-- Dashboard Card -->
+            <div class="app-card dashboard-card" (click)="navigateToDashboard()">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <h2 class="card-title">HM Decision Dashboard</h2>
+                <p class="card-description">
+                    View project status, department-wise metrics, and performance indicators
+                </p>
+                <ul class="card-features">
+                    <li><i class="fa-solid fa-check"></i> Analytics & Reports</li>
+                    <li><i class="fa-solid fa-check"></i> Department Wise View</li>
+                    <li><i class="fa-solid fa-check"></i> Project Tracking</li>
+                </ul>
+                <div class="card-footer">
+                    <span class="view-btn">Explore Dashboard</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <!-- Field Execution Card -->
+            <div class="app-card execution-card" (click)="navigateToFieldExecution()">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-hard-hat"></i>
+                </div>
+                <h2 class="card-title">Field Execution</h2>
+                <p class="card-description">
+                    Manage field work, site visits, and ground-level project execution
+                </p>
+                <ul class="card-features">
+                    <li><i class="fa-solid fa-check"></i> Site Management</li>
+                    <li><i class="fa-solid fa-check"></i> Team Coordination</li>
+                    <li><i class="fa-solid fa-check"></i> Progress Tracking</li>
+                </ul>
+                <div class="card-footer">
+                    <span class="view-btn">Go to Execution</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

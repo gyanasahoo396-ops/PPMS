@@ -112,7 +112,7 @@ export class InterventionProjectsComponent implements OnInit {
     }
 
     openProject(id: string): void {
-        this.router.navigate(['/project', id]);
+        this.router.navigate(['/dhamnagar-dashboard/project', id]);
     }
 
     getStatusClass(status: string): string {
@@ -133,7 +133,7 @@ export class InterventionProjectsComponent implements OnInit {
     }
 
     goBack(): void {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dhamnagar-dashboard/dashboard']);
     }
 
     protected readonly Math = Math;

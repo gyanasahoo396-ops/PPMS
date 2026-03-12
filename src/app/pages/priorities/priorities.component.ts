@@ -24,6 +24,6 @@ export class PrioritiesComponent implements OnInit {
     }
 
     openProjectDetails(projectId: string): void {
-        this.router.navigate(['/project', projectId]);
+        this.router.navigate(['/dhamnagar-dashboard/project', projectId]);
     }
 }

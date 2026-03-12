@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { DepartmentSchemesService, DepartmentEntry, SchemeCard } from '../../services/department-schemes.service';
 
 @Component({
@@ -23,11 +24,29 @@ export class DepartmentsComponent implements OnInit {
     drawerScheme: SchemeCard | null = null;
     drawerDept: DepartmentEntry | null = null;
 
-    constructor(private deptService: DepartmentSchemesService) {}
+    constructor(
+        private deptService: DepartmentSchemesService,
+        private route: ActivatedRoute
+    ) {}
 
     ngOnInit(): void {
         this.departments = this.deptService.getDepartments();
-        if (this.departments.length > 0) {
+        
+        // Check for query parameter to select a specific department
+        this.route.queryParams.subscribe(params => {
+            const deptName = params['dept'];
+            if (deptName) {
+                // Use the service's mapping to find the department
+                const matching = this.deptService.getDepartmentByName(deptName);
+                if (matching) {
+                    this.selectDepartment(matching);
+                }
+            } else if (this.departments.length > 0 && !this.selectedDept) {
+                this.selectedDept = this.departments[0];
+            }
+        });
+        
+        if (this.departments.length > 0 && !this.selectedDept) {
             this.selectedDept = this.departments[0];
         }
     }

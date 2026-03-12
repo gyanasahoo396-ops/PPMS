@@ -1,0 +1,128 @@
+<div class="mmsy-trip-container">
+    <!-- Header -->
+    <div class="header-section">
+        <h1 class="page-title">MMSY – TRIP</h1>
+        <p class="page-subtitle">11Transferred Road Improvement Program</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon total">
+                <i class="fa-solid fa-road"></i>
+            </div>
+            <div class="stat-content">
+                <p class="stat-label">Total Roads</p>
+                <p class="stat-value">{{ stats().totalRoads }}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon length">
+                <i class="fa-solid fa-ruler"></i>
+            </div>
+            <div class="stat-content">
+                <p class="stat-label">Total Length</p>
+                <p class="stat-value">{{ stats().totalLength.toFixed(2) }} km</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon cost">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+            </div>
+            <div class="stat-content">
+                <p class="stat-label">Sanctioned Cost</p>
+                <p class="stat-value">₹{{ (stats().totalSanctionedCost).toFixed(2) }} L</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon expenditure">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <p class="stat-label">Total Expenditure</p>
+                <p class="stat-value">₹{{ (stats().totalExpenditure).toFixed(2) }} L</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Summary -->
+    <div class="status-summary">
+        <div class="status-item ongoing">
+            <i class="fa-solid fa-spinner"></i>
+            <span>Ongoing: </span>
+            <span class="count">{{ stats().ongoingCount }}</span>
+        </div>
+        <div class="status-item completed">
+            <i class="fa-solid fa-check-circle"></i>
+            <span>Completed: </span>
+            <span class="count">{{ stats().completedCount }}</span>
+        </div>
+        <div class="status-item planned">
+            <i class="fa-solid fa-calendar"></i>
+            <span>Planned: </span>
+            <span class="count">{{ stats().plannedCount }}</span>
+        </div>
+        <div class="status-item stuck">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Stuck: </span>
+            <span class="count">{{ stats().stuckCount }}</span>
+        </div>
+    </div>
+
+    <!-- Roads Table -->
+    <div class="table-container">
+        <table class="roads-table">
+            <thead>
+                <tr>
+                    <th>Sl.</th>
+                    <th>RW Division</th>
+                    <th>Assembly</th>
+                    <th>Block</th>
+                    <th>Road Name</th>
+                    <th>Length (km)</th>
+                    <th>Approved Cost (₹ L)</th>
+                    <th>Contract Agency</th>
+                    <th>Expenditure (₹ L)</th>
+                    <th>Status</th>
+                    <th>Period</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (road of roads(); track road.id) {
+                    <tr [class.completed]="road.status === 'Completed'" [class.ongoing]="road.status === 'Ongoing'">
+                        <td class="text-center">{{ road.slNo }}</td>
+                        <td>{{ road.rwDivision }}</td>
+                        <td>{{ road.assemblyConstituency }}</td>
+                        <td>{{ road.block }}</td>
+                        <td class="road-name">{{ road.roadName }}</td>
+                        <td class="text-center">{{ formatLength(road.approvedLength) }}</td>
+                        <td class="text-right">{{ road.approvedCost.toFixed(2) }}</td>
+                        <td>{{ road.contractAgency }}</td>
+                        <td class="text-right">{{ road.totalExpenditure.toFixed(2) }}</td>
+                        <td class="text-center">
+                            <span [class]="'status-badge ' + getStatusBadgeClass(road.status)">
+                                {{ road.status }}
+                            </span>
+                        </td>
+                        <td class="text-center">{{ road.startDate }} to {{ road.endDate }}</td>
+                        <td>{{ road.remarks }}</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="footer-row">
+                    <td colspan="5" class="font-semibold">TOTAL</td>
+                    <td class="text-center font-semibold">{{ stats().totalLength.toFixed(3) }} km</td>
+                    <td class="text-right font-semibold">{{ stats().totalSanctionedCost.toFixed(2) }}</td>
+                    <td colspan="1"></td>
+                    <td class="text-right font-semibold">{{ stats().totalExpenditure.toFixed(2) }}</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

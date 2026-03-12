@@ -1,10 +1,11 @@
 import { Component, OnInit, inject, computed, signal, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-header',
-    imports: [CommonModule],
+    imports: [CommonModule, RouterModule],
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.css']
 })

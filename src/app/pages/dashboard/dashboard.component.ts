@@ -1,8 +1,9 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import { ProjectDataService } from '../../services/project-data.service';
+import { MMSYTRIPService } from '../../services/mmsy-trip.service';
 import { Project, ProjectStats, RDSchemeData } from '../../models/project.model';
 
 Chart.register(...registerables);
@@ -28,6 +29,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     hmCommittedProjects = signal<Project[]>([]);
     rdSchemeData = signal<RDSchemeData[]>([]);
     departmentBreakdown = signal<any[]>([]);
+
+    // MMSY-TRIP Service
+    mmsy = inject(MMSYTRIPService);
 
     // Computed RD totals
     rdTotalProjects = computed(() => this.rdSchemeData().reduce((sum, s) => sum + s.count, 0));
@@ -60,11 +64,15 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     navigateToStuck(): void {
-        this.router.navigate(['/stuck']);
+        this.router.navigate(['/dhamnagar-dashboard/stuck']);
+    }
+
+    navigateToDepartment(deptName: string): void {
+        this.router.navigate(['/dhamnagar-dashboard/departments'], { queryParams: { dept: deptName } });
     }
 
     openProjectDetails(projectId: string): void {
-        this.router.navigate(['/project', projectId]);
+        this.router.navigate(['/dhamnagar-dashboard/project', projectId]);
     }
 
     getStatusColor(status: string): string {

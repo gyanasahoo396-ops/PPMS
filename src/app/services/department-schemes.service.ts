@@ -213,21 +213,12 @@ export class DepartmentSchemesService {
 
         {
           name: 'MMSY – TRIP (Transferred Road Improvement Program)',
-          projects: 11, totalCost: 58.20, spent: 0,
-          completed: 0, inProgress: 0, stuck: 0, planned: 11,
-          roadLength: 48.50,
+          projects: 2, totalCost: 23.86, spent: 14.14,
+          completed: 0, inProgress: 2, stuck: 0, planned: 0,
+          roadLength: 15.20,
           projectList: [
-            { slNo:  1, district: 'Bhadrak', division: 'Bhadrak-I',  constituency: 'Dhamnagar', roadName: 'Road from Andrei chhak to Orali via Bandhanayakani',                                                           lengthKm: 4.0,  costLakh: 480,  status: 'Planned' },
-            { slNo:  2, district: 'Bhadrak', division: 'Bhadrak-I',  constituency: 'Dhamnagar', roadName: 'Road from Arjunpur Kochila Bridge to Mamadula via Talasailo Daspari',                                          lengthKm: 5.0,  costLakh: 600,  status: 'Planned' },
-            { slNo:  3, district: 'Bhadrak', division: 'Bhadrak-I',  constituency: 'Dhamnagar', roadName: 'Road from Tentuligaon road to Angeipal',                                                                       lengthKm: 3.0,  costLakh: 360,  status: 'Planned' },
-            { slNo:  4, district: 'Bhadrak', division: 'Bhadrak-I',  constituency: 'Dhamnagar', roadName: 'Road from Sadanandapur to Bilasahi under Guamala GP',                                                          lengthKm: 3.0,  costLakh: 360,  status: 'Planned' },
-            { slNo:  5, district: 'Bhadrak', division: 'Bhadrak-I',  constituency: 'Dhamnagar', roadName: 'PR road from Bilana Mangalapur RD road to CS Nandor RD road via Narasinghpur & Nischanta Jenasahi of Talagopabindha', lengthKm: 3.5, costLakh: 420, status: 'Planned' },
-            { slNo:  6, district: 'Bhadrak', division: 'Bhadrak-I',  constituency: 'Dhamnagar', roadName: 'Road from Kudamahara to Basantihata via Mirpur, Panchabati & Tiadisahi',                                      lengthKm: 5.0,  costLakh: 600,  status: 'Planned' },
-            { slNo:  7, district: 'Bhadrak', division: 'Bhadrak-II', constituency: 'Dhamnagar', roadName: 'Katasahi Bautarapal to Torabantia bridge via Patna Hanuman temple',                                           lengthKm: 4.0,  costLakh: 480,  status: 'Planned' },
-            { slNo:  8, district: 'Bhadrak', division: 'Bhadrak-II', constituency: 'Dhamnagar', roadName: 'Jahangir to Salampur (solagaon) via Krushnadaspur',                                                            lengthKm: 5.0,  costLakh: 600,  status: 'Planned' },
-            { slNo:  9, district: 'Bhadrak', division: 'Bhadrak-II', constituency: 'Dhamnagar', roadName: 'Pochalo School to Dhusuri Khadimahara Rd road via Pochala Saw mill–Khadimahara Gandhipadia',                  lengthKm: 6.0,  costLakh: 720,  status: 'Planned' },
-            { slNo: 10, district: 'Bhadrak', division: 'Bhadrak-II', constituency: 'Dhamnagar', roadName: 'PWD road to Biruhan to Soda via Karada',                                                                       lengthKm: 5.0,  costLakh: 600,  status: 'Planned' },
-            { slNo: 11, district: 'Bhadrak', division: 'Bhadrak-I',  constituency: 'Dhamnagar', roadName: 'Baro Salandi Bridge to Arsha via Dhali pola',                                                                  lengthKm: 5.0,  costLakh: 600,  status: 'Planned' },
+            { slNo: 1, district: 'Bhadrak', division: 'Bhadrak-I', constituency: 'Dhamnagar', roadName: 'Tihid-Bilana Road', lengthKm: 8.0, costLakh: 1256.00, status: 'In Progress' },
+            { slNo: 2, district: 'Bhadrak', division: 'Bhadrak-I', constituency: 'Dhamnagar', roadName: 'Nayananda Chhhbaga Sasan to Tarinchihak Via-ramanujayidyapitia & Bianchinarayan Temple', lengthKm: 7.2, costLakh: 1130.40, status: 'In Progress' },
           ]
         },
 
@@ -316,6 +307,7 @@ export class DepartmentSchemesService {
         { name: 'MAMATA',                                projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
         { name: 'PMMVY',                                 projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
         { name: 'Advika',                                projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
+        { name: 'Anganwadi Centers',                     projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
       ]
     },
 
@@ -363,6 +355,22 @@ export class DepartmentSchemesService {
         { name: 'OSRP',                                                projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
         { name: 'Bridge-cum-Weir',                                     projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
         { name: 'Integrated Development of Heritage and Monuments',    projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
+      ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // Schools and Mass
+    // ─────────────────────────────────────────────────────────────
+    {
+      name: 'Schools and Mass', shortName: 'SAM',
+      icon: 'fa-solid fa-school', color: 'lime',
+      schemes: [
+        { name: 'Samagra Shiksha Abhiyaan', projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
+        { name: 'Mid Day Meal Scheme', projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
+        { name: 'Teachers Training and Development', projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
+        { name: 'School Infrastructure Development', projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
+        { name: 'Digital Literacy Programme', projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
+        { name: 'Girl Child Education Scheme', projects: 0, totalCost: 0, spent: 0, completed: 0, inProgress: 0, stuck: 0, planned: 0 },
       ]
     },
   ];
@@ -500,6 +508,7 @@ export class DepartmentSchemesService {
     'MAMATA':                               [5, 2.0, 1.8,4,1,0,0],
     'PMMVY':                                [4, 1.5, 1.5,4,0,0,0],
     'Advika':                               [2, 4.0, 2.0,0,1,0,1],
+    'Anganwadi Centers':                    [12, 8.5, 6.5,4,6,1,1],
     // ── Water Resources ──────────────────────────────────────────
     'In-stream Storage':                    [4,28.0,20.0,1,3,0,0],
     'PMKSY-AIBP':                           [2,85.0,60.0,0,2,0,0],
@@ -528,6 +537,13 @@ export class DepartmentSchemesService {
     'SAMALEI':                              [1,28.0,18.0,0,1,0,0],
     'OSRP':                                 [3,45.0,30.0,1,2,0,0],
     'Integrated Development of Heritage':   [2,15.0, 8.0,0,1,0,1],
+    // ── Schools and Mass ─────────────────────────────────────────
+    'Samagra Shiksha Abhiyaan':             [8,25.0,15.0,2,4,1,1],
+    'Mid Day Meal Scheme':                  [5, 4.5, 4.0,4,1,0,0],
+    'Teachers Training and Development':    [6, 3.2, 2.5,3,2,0,1],
+    'School Infrastructure Development':    [10,35.0,20.0,2,6,1,1],
+    'Digital Literacy Programme':           [4, 2.8, 2.2,2,2,0,0],
+    'Girl Child Education Scheme':          [7, 5.5, 4.0,3,3,0,1],
   };
 
   // Locations within Dhamnagar constituency for sample data
@@ -556,12 +572,46 @@ export class DepartmentSchemesService {
     // Pad with 'Planned' if rounding mismatch
     while (statuses.length < n) statuses.push('Planned');
 
+    // Custom names for Anganwadi Centers
+    const anganwadiNames = [
+      'Anganwadi Center – Dhamnagar Town',
+      'Anganwadi Center – Sohada',
+      'Anganwadi Center – Dhusuri',
+      'Anganwadi Center – Kothar GP',
+      'Anganwadi Center – Kulaseri',
+      'Anganwadi Center – Palikiri',
+      'Anganwadi Center – Guamala GP',
+      'Anganwadi Center – Tiadisahi',
+      'Anganwadi Center – Jayapur',
+      'Anganwadi Center – Lunia',
+      'Anganwadi Center – Bhatapada',
+      'Anganwadi Center – Gandhibazar',
+    ];
+
+    // Custom names for School Infrastructure Development
+    const schoolNames = [
+      'Government Primary School – Dhamnagar Town',
+      'Government High School – Sohada',
+      'Government Girls High School – Dhusuri',
+      'Government Primary School – Kothar GP',
+      'Government High School – Kulaseri',
+      'Government Primary School – Palikiri',
+      'Government High School – Guamala GP',
+      'Government Upper Primary School – Tiadisahi',
+      'Government Primary School – Jayapur',
+      'Government High School – Lunia',
+    ];
+
     return Array.from({ length: n }, (_, i) => ({
       slNo:         i + 1,
       district:     'Bhadrak',
       division:     'Dhamnagar Block',
       constituency: 'Dhamnagar',
-      roadName:     `${scheme.name} – ${this.locations[i % this.locations.length]}`,
+      roadName:     scheme.name === 'Anganwadi Centers' 
+        ? anganwadiNames[i % anganwadiNames.length]
+        : scheme.name === 'School Infrastructure Development'
+        ? schoolNames[i % schoolNames.length]
+        : `${scheme.name} – ${this.locations[i % this.locations.length]}`,
       costLakh:     costPerProject,
       status:       statuses[i],
     }));
@@ -602,6 +652,30 @@ export class DepartmentSchemesService {
   }
 
   getDepartmentByName(name: string): DepartmentEntry | undefined {
-    return this.departments.find(d => d.name === name || d.shortName === name);
+    // Create mapping from project data dept abbreviations to department entry names
+    const deptMapping: Record<string, string> = {
+      'WR': 'Water Resources',
+      'RD': 'Rural Development',
+      'PR Block': 'Panchayati Raj & Drinking Water',
+      'PWD': 'Works',
+      'RWSS': 'Panchayati Raj & Drinking Water',
+      'H&UD': 'Housing & Urban Development',
+      'Sports': 'Sports & Youth Services',
+      'Health': 'Health & Family Welfare',
+      'Culture': 'Odia Language, Literature & Culture',
+    };
+
+    // Try exact match first
+    let dept = this.departments.find(d => d.name === name || d.shortName === name);
+    if (dept) return dept;
+
+    // Try mapped department
+    const mappedName = deptMapping[name];
+    if (mappedName) {
+      dept = this.departments.find(d => d.name === mappedName);
+      if (dept) return dept;
+    }
+
+    return undefined;
   }
 }

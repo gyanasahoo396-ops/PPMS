@@ -1,0 +1,288 @@
+.mmsy-trip-container {
+    padding: 0;
+}
+
+.header-section {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    padding: 2rem;
+    color: white;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.page-subtitle {
+    font-size: 1.125rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stat-icon.total {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+}
+
+.stat-icon.length {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.stat-icon.cost {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.stat-icon.expenditure {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0.25rem 0 0 0;
+}
+
+/* Status Summary */
+.status-summary {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.status-item.ongoing {
+    background: #eff6ff;
+    color: #1e40af;
+    border-left: 4px solid #3b82f6;
+}
+
+.status-item.completed {
+    background: #f0fdf4;
+    color: #15803d;
+    border-left: 4px solid #10b981;
+}
+
+.status-item.planned {
+    background: #fffbeb;
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+}
+
+.status-item.stuck {
+    background: #fef2f2;
+    color: #7f1d1d;
+    border-left: 4px solid #ef4444;
+}
+
+.status-item i {
+    font-size: 1.25rem;
+    min-width: 24px;
+}
+
+.status-item .count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+/* Table Container */
+.table-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow-x: auto;
+}
+
+.roads-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.roads-table thead {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.roads-table th {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 2px solid #e5e7eb;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.roads-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease;
+}
+
+.roads-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.roads-table td {
+    padding: 1rem;
+}
+
+.roads-table td.text-center {
+    text-align: center;
+}
+
+.roads-table td.text-right {
+    text-align: right;
+}
+
+.roads-table td.road-name {
+    max-width: 250px;
+    word-break: break-word;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 1px solid;
+}
+
+/* Footer Row */
+.footer-row {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #1f2937;
+    border-top: 2px solid #1e40af;
+}
+
+.footer-row td {
+    padding: 1rem;
+    border: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-section {
+        padding: 1.5rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .status-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .roads-table {
+        font-size: 0.8rem;
+    }
+
+    .roads-table th,
+    .roads-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .roads-table td.road-name {
+        max-width: 150px;
+    }
+}

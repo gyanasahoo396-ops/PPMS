@@ -64,9 +64,9 @@ export class AuthService {
         console.warn('Failed to update last login:', error);
       });
       
-      // Navigate to dashboard
-      console.log('Navigating to dashboard...');
-      const navigated = await this.router.navigate(['/dashboard']);
+      // Navigate to home
+      console.log('Navigating to home...');
+      const navigated = await this.router.navigate(['/home']);
       console.log('Navigation result:', navigated);
       this.isLoading.set(false);
     } catch (error: any) {

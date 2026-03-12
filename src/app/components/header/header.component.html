@@ -1,10 +1,19 @@
 <header class="bg-white shadow-professional h-16 flex items-center justify-between px-4 md:px-8 z-10 border-b border-slate-100 flex-shrink-0">
     <!-- Hamburger (mobile) -->
-    <button class="md:hidden text-slate-600 hover:text-slate-900 focus:outline-none transition-colors p-2 -ml-2 rounded-lg hover:bg-slate-100"
-        (click)="onToggleSidebar()"
-        aria-label="Open menu">
-        <i class="fa-solid fa-bars text-xl"></i>
-    </button>
+    <div class="flex items-center gap-2">
+        <button class="md:hidden text-slate-600 hover:text-slate-900 focus:outline-none transition-colors p-2 -ml-2 rounded-lg hover:bg-slate-100"
+            (click)="onToggleSidebar()"
+            aria-label="Open menu">
+            <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+
+        <!-- Home Button -->
+        <button routerLink="/" 
+            class="text-slate-600 hover:text-brand-600 focus:outline-none transition-colors p-2 rounded-lg hover:bg-slate-100" 
+            title="Go to Home">
+            <i class="fa-solid fa-home text-lg"></i>
+        </button>
+    </div>
 
     <h2 class="text-base sm:text-xl font-bold text-slate-800 tracking-tight truncate">{{ pageTitle }}</h2>
 
