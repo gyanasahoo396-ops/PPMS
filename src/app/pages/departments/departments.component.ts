@@ -1,13 +1,14 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DepartmentSchemesService, DepartmentEntry, SchemeCard } from '../../services/department-schemes.service';
+import { MobilePageHeaderComponent } from '../../components/mobile-page-header/mobile-page-header.component';
 
 @Component({
     selector: 'app-departments',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, MobilePageHeaderComponent],
     templateUrl: './departments.component.html',
     styleUrls: ['./departments.component.css']
 })
@@ -26,7 +27,8 @@ export class DepartmentsComponent implements OnInit {
 
     constructor(
         private deptService: DepartmentSchemesService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private router: Router
     ) {}
 
     ngOnInit(): void {
@@ -62,6 +64,10 @@ export class DepartmentsComponent implements OnInit {
         this.mobileShowContent = false;
     }
 
+    goToHome(): void {
+        this.router.navigate(['/home']);
+    }
+
     get filteredSchemes(): SchemeCard[] {
         if (!this.selectedDept) return [];
         const q = this.searchQuery.toLowerCase();
@@ -76,6 +82,10 @@ export class DepartmentsComponent implements OnInit {
     get spentPercentage(): number {
         const cost = this.totalCost;
         return cost > 0 ? (this.totalSpent / cost) * 100 : 0;
+    }
+
+    getDeptProjectCount(dept: DepartmentEntry): number {
+        return dept.schemes.reduce((s, sc) => s + sc.projects, 0);
     }
 
     /** Scheme card click → open drawer */

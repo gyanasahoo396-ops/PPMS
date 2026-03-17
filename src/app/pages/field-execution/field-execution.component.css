@@ -1,5 +1,5 @@
 .field-execution-container {
-    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     background: #f9fafb;
@@ -58,15 +58,143 @@
 .fe-subtitle {
     margin: 0.25rem 0 0 0;
     opacity: 0.95;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .fe-content {
     flex: 1;
-    padding: 2rem;
+    padding: 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
+    padding-bottom: 80px; /* space for bottom nav */
+}
+
+/* ---- New Block / GP layout ---- */
+.blocks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.block-group {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+}
+
+.block-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.block-group-header:hover {
+    background: #f8fafc;
+}
+
+.block-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.block-key-icon {
+    font-size: 20px;
+    color: #f59e0b;
+}
+
+.block-group-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.block-gp-count {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Inline GP list (appears under selected block) */
+.gps-inline-list {
+    border-top: 1px solid #f1f5f9;
+}
+
+.gp-inline-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    cursor: pointer;
+    border-bottom: 1px solid #f8fafc;
+    transition: background 0.15s;
+}
+
+.gp-inline-item:hover {
+    background: #f8fafc;
+}
+
+.gp-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f59e0b;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gp-inline-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.gp-chevron {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+@media (max-width: 767px) {
+    .fe-content {
+        padding: 1rem;
+        padding-bottom: 80px;
+    }
+
+    .fe-title {
+        font-size: 1.25rem;
+    }
+    
+    .fe-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .header-icon {
+        font-size: 1.75rem;
+    }
 }
 
 .view-container {

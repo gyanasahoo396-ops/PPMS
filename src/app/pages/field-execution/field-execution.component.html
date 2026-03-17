@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="fe-header">
         <div class="fe-header-content">
-            <button class="back-button" (click)="goBack()">
+            <button class="back-button" (click)="goBack()" aria-label="Back">
                 <i class="fa-solid fa-arrow-left"></i>
                 <span>Back</span>
             </button>
@@ -10,7 +10,7 @@
                 <i class="fa-solid fa-hard-hat header-icon"></i>
                 <div>
                     <h1 class="fe-title">Field Execution</h1>
-                    <p class="fe-subtitle">Manage blocks, GPs, and project execution</p>
+                    <p class="fe-subtitle">MANAGE BLOCKS, GPs, AND PROJECT EXECUTION</p>
                 </div>
             </div>
         </div>
@@ -19,63 +19,31 @@
     <!-- Content -->
     <div class="fe-content">
         <!-- Blocks List View -->
-        <div class="view-container" [class.hidden]="showGPsList()">
+        <div class="view-container" [class.hidden]="showProjectsList()">
             <div class="blocks-list">
-                <div class="section-header">
-                    <i class="fa-solid fa-map"></i>
-                    <h2>Blocks in Dhamnagar</h2>
-                    <span class="count-badge">{{ blocks().length }}</span>
-                </div>
-
-                <div class="blocks-grid">
-                    @for (block of blocks(); track block.name) {
-                    <div class="block-card" (click)="selectBlock(block)" [ngClass]="getBlockColor(block.color)">
-                        <div class="block-icon-wrapper">
-                            <i [class]="block.icon + ' ' + getIconColor(block.color)"></i>
+                @for (block of blocks(); track block.name) {
+                <div class="block-group">
+                    <div class="block-group-header" (click)="selectBlock(block)">
+                        <div class="block-header-left">
+                            <i class="fa-solid fa-key block-key-icon"></i>
+                            <h3 class="block-group-name">{{ block.name }}</h3>
                         </div>
-                        <h3 class="block-name">{{ block.name }}</h3>
-                        <p class="block-meta">{{ block.gps.length }} GPs</p>
+                        <span class="block-gp-count">{{ block.gps.length }}</span>
                     </div>
+                    <!-- GPs under this block (shown only when this block is selected on mobile) -->
+                    @if (selectedBlock()?.name === block.name && showGPsList()) {
+                        <div class="gps-inline-list">
+                            @for (gp of block.gps; track gp.name) {
+                            <div class="gp-inline-item" (click)="selectGP(gp)">
+                                <span class="gp-number">{{ $index + 1 }}</span>
+                                <span class="gp-inline-name">{{ gp.name }}</span>
+                                <i class="fa-solid fa-chevron-right gp-chevron"></i>
+                            </div>
+                            }
+                        </div>
                     }
                 </div>
-            </div>
-        </div>
-
-        <!-- GPs List View -->
-        <div class="view-container" [class.hidden]="!showGPsList()">
-            <div class="gps-list">
-                <div class="section-header">
-                    <button class="back-nav-button" (click)="goBackToBlocks()">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
-                    <div class="header-title">
-                        <i class="fa-solid fa-map-pin"></i>
-                        <h2>{{ selectedBlock()?.name }}</h2>
-                    </div>
-                    <span class="count-badge">{{ selectedBlock()?.gps ? selectedBlock()!.gps.length : 0 }}</span>
-                </div>
-
-                <div class="gps-grid">
-                    @for (gp of selectedBlock()?.gps; track gp.name) {
-                    <div class="gp-card" (click)="selectGP(gp)">
-                        <div class="gp-card-header">
-                            <span class="gp-serial">{{ $index + 1 }}</span>
-                            <h3 class="gp-name">{{ gp.name }}</h3>
-                            <i class="fa-solid fa-arrow-right gp-arrow"></i>
-                        </div>
-                        <div class="gp-meta">
-                            <span class="meta-item">
-                                <i class="fa-solid fa-home"></i>
-                                {{ gp.villageCount }} Villages
-                            </span>
-                            <span class="meta-item">
-                                <i class="fa-solid fa-list"></i>
-                                {{ gp.projects.length }} Projects
-                            </span>
-                        </div>
-                    </div>
-                    }
-                </div>
+                }
             </div>
         </div>
 
@@ -83,11 +51,10 @@
         <div class="view-container" [class.hidden]="!showProjectsList()">
             <div class="projects-list">
                 <div class="section-header">
-                    <button class="back-nav-button" (click)="goBackToGPs()">
+                    <button class="back-nav-button" (click)="goBackToGPs()" aria-label="Back to GPs">
                         <i class="fa-solid fa-arrow-left"></i>
                     </button>
                     <div class="header-title">
-                        <i class="fa-solid fa-list-check"></i>
                         <h2>Projects of {{ selectedGP()?.name }}</h2>
                     </div>
                     <span class="count-badge">{{ selectedProjects().length }}</span>
@@ -115,7 +82,7 @@
                                 <td class="col-project">{{ project.projectName }}</td>
                                 <td class="col-cost">{{ formatCurrency(project.estimatedCost) }}</td>
                                 <td class="col-status">
-                                    <span class="status-badge" [ngClass]="getStatusBadgeClass(project.status)">
+                                    <span class="status-badge" [class]="getStatusBadgeClass(project.status)">
                                         {{ project.status }}
                                     </span>
                                 </td>
@@ -141,4 +108,7 @@
             </div>
         </div>
     </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <app-bottom-nav />
 </div>

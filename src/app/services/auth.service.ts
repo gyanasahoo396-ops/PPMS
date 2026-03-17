@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, Injector, runInInjectionContext } from '@angular/core';
 import {
   Auth,
   signInWithEmailAndPassword,
@@ -16,6 +16,7 @@ export class AuthService {
   private auth = inject(Auth);
   private router = inject(Router);
   private userService = inject(UserService);
+  private injector = inject(Injector);
 
   // Signals for reactive state management
   currentUser = signal<User | null>(null);
@@ -32,8 +33,11 @@ export class AuthService {
       if (firebaseUser) {
         this.isAuthenticated.set(true);
         try {
-          // Fetch user data from Firestore
-          const userData = await this.userService.getUserByUid(firebaseUser.uid);
+          // Fetch user data from Firestore — must run inside injection context
+          // because AngularFire internally calls inject() in getDoc/doc APIs.
+          const userData = await runInInjectionContext(this.injector, () =>
+            this.userService.getUserByUid(firebaseUser.uid)
+          );
           this.currentUser.set(userData);
         } catch (error) {
           console.error('Error fetching user data:', error);

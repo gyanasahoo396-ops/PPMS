@@ -1,17 +1,20 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FieldExecutionService } from '../../services/field-execution.service';
 import { Block, GramPanchayat, FieldProject } from '../../models/field-execution.model';
+import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
 
 @Component({
     selector: 'app-field-execution',
-    standalone: true,
-    imports: [CommonModule],
+    imports: [BottomNavComponent],
     templateUrl: './field-execution.component.html',
-    styleUrls: ['./field-execution.component.css']
+    styleUrl: './field-execution.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FieldExecutionComponent implements OnInit {
+    private readonly router = inject(Router);
+    private readonly fieldExecutionService = inject(FieldExecutionService);
+
     blocks = signal<Block[]>([]);
     selectedBlock = signal<Block | null>(null);
     selectedGP = signal<GramPanchayat | null>(null);
@@ -19,28 +22,26 @@ export class FieldExecutionComponent implements OnInit {
     showGPsList = signal(false);
     showProjectsList = signal(false);
 
-    constructor(
-        private router: Router,
-        private fieldExecutionService: FieldExecutionService
-    ) {}
-
     ngOnInit(): void {
         this.blocks.set(this.fieldExecutionService.getBlocks());
-        if (this.blocks().length > 0) {
-            this.selectBlock(this.blocks()[0]);
-        }
     }
 
     goBack(): void {
-        this.router.navigate(['/']);
+        this.router.navigate(['/home']);
     }
 
     selectBlock(block: Block): void {
-        this.selectedBlock.set(block);
-        this.selectedGP.set(null);
-        this.selectedProjects.set([]);
-        this.showGPsList.set(true);
-        this.showProjectsList.set(false);
+        if (this.selectedBlock()?.name === block.name && this.showGPsList()) {
+            // toggle off if already selected
+            this.selectedBlock.set(null);
+            this.showGPsList.set(false);
+        } else {
+            this.selectedBlock.set(block);
+            this.selectedGP.set(null);
+            this.selectedProjects.set([]);
+            this.showGPsList.set(true);
+            this.showProjectsList.set(false);
+        }
     }
 
     selectGP(gp: GramPanchayat): void {

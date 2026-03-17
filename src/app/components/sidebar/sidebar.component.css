@@ -15,14 +15,22 @@
     width: 280px;
     height: 100vh;
     z-index: 40;
+    /* Prevent the host element from intercepting pointer events when hidden */
+    pointer-events: none;
+  }
+
+  aside {
+    pointer-events: auto;
   }
 
   aside.sidebar-closed {
     transform: translateX(-100%);
+    pointer-events: none;
   }
 
   aside.sidebar-open {
     transform: translateX(0);
+    pointer-events: auto;
   }
 }
 

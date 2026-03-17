@@ -5,13 +5,13 @@ import { Chart, registerables } from 'chart.js';
 import { ProjectDataService } from '../../services/project-data.service';
 import { MMSYTRIPService } from '../../services/mmsy-trip.service';
 import { Project, ProjectStats, RDSchemeData } from '../../models/project.model';
+import { MobilePageHeaderComponent } from '../../components/mobile-page-header/mobile-page-header.component';
 
 Chart.register(...registerables);
 
 @Component({
     selector: 'app-dashboard',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, MobilePageHeaderComponent],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
@@ -65,6 +65,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     navigateToStuck(): void {
         this.router.navigate(['/dhamnagar-dashboard/stuck']);
+    }
+
+    goToHome(): void {
+        this.router.navigate(['/home']);
     }
 
     navigateToDepartment(deptName: string): void {

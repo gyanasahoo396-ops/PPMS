@@ -3,18 +3,15 @@
     <header class="navbar-header">
         <div class="navbar-content">
             <div class="navbar-brand">
-                <i class="fa-solid fa-landmark"></i>
+                <div class="brand-icon">D</div>
                 <div class="brand-text">
-                    <span class="brand-name">Dhamnagar</span>
-                    <span class="brand-subtitle">Constituency Monitor</span>
+                    <span class="brand-name">Dhamnagar D3</span>
+                    <span class="brand-subtitle">Constituency Management</span>
                 </div>
             </div>
             <div class="navbar-actions" *ngIf="isAuthenticated()">
-                <div class="user-section" *ngIf="currentUser()">
-                    <span class="user-name">{{ currentUser()?.displayName || currentUser()?.email }}</span>
-                </div>
-                <button class="logout-btn" (click)="logout()" title="Logout">
-                    <i class="fa-solid fa-sign-out-alt"></i>
+                <button class="logout-btn" (click)="logout()" title="Logout" aria-label="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
         </div>
@@ -37,16 +34,10 @@
                 </div>
                 <h2 class="card-title">HM Decision Dashboard</h2>
                 <p class="card-description">
-                    View project status, department-wise metrics, and performance indicators
+                    Global analytics, department tracking, and performance reports.
                 </p>
-                <ul class="card-features">
-                    <li><i class="fa-solid fa-check"></i> Analytics & Reports</li>
-                    <li><i class="fa-solid fa-check"></i> Department Wise View</li>
-                    <li><i class="fa-solid fa-check"></i> Project Tracking</li>
-                </ul>
                 <div class="card-footer">
-                    <span class="view-btn">Explore Dashboard</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+                    <span class="view-btn">Explore Dashboard →</span>
                 </div>
             </div>
 
@@ -57,16 +48,10 @@
                 </div>
                 <h2 class="card-title">Field Execution</h2>
                 <p class="card-description">
-                    Manage field work, site visits, and ground-level project execution
+                    Manage blocks, GPs, and ground-level project execution.
                 </p>
-                <ul class="card-features">
-                    <li><i class="fa-solid fa-check"></i> Site Management</li>
-                    <li><i class="fa-solid fa-check"></i> Team Coordination</li>
-                    <li><i class="fa-solid fa-check"></i> Progress Tracking</li>
-                </ul>
                 <div class="card-footer">
-                    <span class="view-btn">Go to Execution</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+                    <span class="view-btn">Go to Execution →</span>
                 </div>
             </div>
         </div>

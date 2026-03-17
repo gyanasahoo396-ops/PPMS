@@ -1,5 +1,15 @@
 <div class="dept-wise-layout" [class.mobile-show-content]="mobileShowContent">
 
+  <!-- Mobile Header: sticky, shown only on list view -->
+  @if (!mobileShowContent) {
+    <app-mobile-page-header
+      title="Departments"
+      [showAvatar]="false"
+      (back)="goToHome()"
+      class="block md:hidden"
+    />
+  }
+
   <!-- ===== LEFT PANEL: Department List ===== -->
   <aside class="dept-sidebar">
     <div class="dept-sidebar-header">
@@ -7,6 +17,8 @@
       <span>Departments</span>
       <span class="dept-count-pill">{{ departments.length }}</span>
     </div>
+    <!-- Mobile subtitle under header -->
+    <div class="mobile-dept-sub md:hidden">SELECT TO VIEW DETAILED SCHEMES</div>
     <ul class="dept-list">
       <li *ngFor="let dept of departments"
           (click)="selectDepartment(dept)"
@@ -17,7 +29,7 @@
         </div>
         <div class="dept-item-info">
           <span class="dept-item-name">{{ dept.name }}</span>
-          <span class="dept-item-meta">{{ dept.schemes.length }} schemes</span>
+          <span class="dept-item-meta">{{ dept.schemes.length }} SCHEMES&nbsp;•&nbsp;{{ getDeptProjectCount(dept) }} PROJECTS</span>
         </div>
         <i class="fa-solid fa-chevron-right dept-item-arrow"></i>
       </li>

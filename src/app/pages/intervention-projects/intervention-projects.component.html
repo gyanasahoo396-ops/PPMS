@@ -1,7 +1,11 @@
-<div class="space-y-4 sm:space-y-6">
+<div>
+<!-- Mobile Page Header -->
+<app-mobile-page-header title="Intervention Hub" [showAvatar]="false" (back)="goBack()" class="-mx-4 -mt-4 block md:hidden" />
 
-    <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+<div class="space-y-4 sm:space-y-6 mt-4 md:mt-0">
+
+    <!-- Page Header (desktop) -->
+    <div class="hidden md:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div class="flex items-center gap-3">
             <button
                 (click)="goBack()"
@@ -15,6 +19,13 @@
         </div>
         <span class="text-xs text-slate-400 font-medium">
             {{ projects().length }} project{{ projects().length === 1 ? '' : 's' }} found
+        </span>
+    </div>
+
+    <!-- Mobile: project count badge -->
+    <div class="flex md:hidden items-center justify-end -mt-2">
+        <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold border border-slate-200">
+            {{ projects().length }} projects found
         </span>
     </div>
 
@@ -156,4 +167,5 @@
         <p class="text-sm mt-1">All projects are on track</p>
     </div>
     }
+</div>
 </div>

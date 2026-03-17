@@ -8,7 +8,7 @@
   gap: 0;
   /* Break out of the parent <main> padding (p-4 mobile / p-6 desktop) */
   margin: -1rem;
-  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
   overflow: hidden;
   background: #f8fafc;
 }
@@ -16,7 +16,7 @@
 @media (min-width: 768px) {
   .dept-wise-layout {
     margin: -1.5rem;
-    height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
   }
 }
 
@@ -498,14 +498,110 @@
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 768px) {
-  .dept-wise-layout { flex-direction: column; height: auto; overflow: visible; }
-  .dept-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; height: 220px; border-radius: 12px 12px 0 0; }
-  .dept-list { display: flex; overflow-x: auto; padding: 8px; flex-direction: row; }
-  .dept-list-item { flex-direction: column; align-items: center; min-width: 90px; gap: 4px; padding: 8px; }
-  .dept-item-info { text-align: center; }
-  .dept-item-arrow { display: none; }
-  .dept-content { padding: 14px; }
+
+/* Mobile subtitle below header */
+.mobile-dept-sub {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 16px 10px;
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-dept-sub { display: block; }
+  .dept-sidebar-header { display: none; } /* hidden on mobile, MobilePageHeaderComponent is used */
+
+  .dept-mobile-top-header {
+    /* no longer needed - header is position:fixed */
+  }
+
+  .dept-wise-layout {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+    background: #f8fafc;
+    margin: -1rem;
+  }
+
+  .dept-sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: none;
+    overflow: visible;
+  }
+
+  .dept-list {
+    display: flex;
+    flex-direction: column;
+    overflow-x: visible;
+    overflow-y: visible;
+    padding: 8px 12px 80px; /* 80px bottom for bottom nav */
+    gap: 0;
+  }
+
+  .dept-list-item {
+    flex-direction: row;
+    align-items: center;
+    min-width: unset;
+    padding: 14px 12px;
+    margin: 4px 0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border: 1px solid #f1f5f9;
+    gap: 14px;
+  }
+
+  .dept-item-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    font-size: 18px;
+  }
+
+  .dept-item-name {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: normal;
+  }
+
+  .dept-item-meta {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .dept-item-arrow {
+    display: flex;
+    opacity: 0.4;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* hide the right panel when mobile-show-content is false */
+  .dept-wise-layout .dept-content {
+    display: none;
+  }
+
+  /* show content, hide sidebar when mobile-show-content is true */
+  .dept-wise-layout.mobile-show-content .dept-sidebar {
+    display: none;
+  }
+
+  .dept-wise-layout.mobile-show-content app-mobile-page-header {
+    display: none !important;
+  }
+
+  .dept-wise-layout.mobile-show-content .dept-content {
+    display: flex;
+    padding: 12px 12px 80px; /* 80px bottom for bottom nav */
+  }
 }
 
 /* ==========================================================

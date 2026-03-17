@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProjectDataService } from '../../services/project-data.service';
 import { Project } from '../../models/project.model';
+import { MobilePageHeaderComponent } from '../../components/mobile-page-header/mobile-page-header.component';
 
 type FilterType = 'hm' | 'high-visibility' | 'delayed' | 'low-progress';
 
@@ -19,7 +20,7 @@ interface FilterConfig {
 @Component({
     selector: 'app-intervention-projects',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [RouterModule],
+    imports: [RouterModule, MobilePageHeaderComponent],
     templateUrl: './intervention-projects.component.html',
     styleUrls: ['./intervention-projects.component.css']
 })
@@ -133,7 +134,7 @@ export class InterventionProjectsComponent implements OnInit {
     }
 
     goBack(): void {
-        this.router.navigate(['/dhamnagar-dashboard/dashboard']);
+        this.router.navigate(['/home']);
     }
 
     protected readonly Math = Math;

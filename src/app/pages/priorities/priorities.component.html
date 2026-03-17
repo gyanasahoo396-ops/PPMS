@@ -1,46 +1,47 @@
-<div class="space-y-6">
-    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-5 rounded-xl border-l-4 border-amber-500 shadow-professional">
+<div>
+<!-- Mobile Page Header -->
+<app-mobile-page-header title="HM Priorities" [showAvatar]="false" (back)="goToHome()" class="-mx-4 -mt-4 block md:hidden" />
+
+<div class="space-y-6 mt-4 md:mt-0">
+    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-xl border-l-4 border-amber-500 shadow-sm">
         <p class="text-sm text-amber-900 leading-relaxed">
-            <strong class="font-bold">High Visibility Projects:</strong> These projects have been tagged as "HM Committed". Priority
-            tracking ensures these are completed within the announced timelines.
+            <strong class="font-bold">HIGH VISIBILITY</strong><br>
+            Projects tagged as "HM Committed". Priority tracking ensures these are completed within the announced timelines.
         </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div *ngFor="let project of priorityProjects"
-            class="bg-white rounded-2xl shadow-professional overflow-hidden border border-slate-200 hover:shadow-professional-lg hover:scale-[1.02] transform transition-all duration-300">
-            <div class="h-36 bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center relative">
-                <i class="fa-solid fa-star text-5xl text-brand-300 opacity-40"></i>
+            class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 hover:shadow-md hover:scale-[1.01] transform transition-all duration-300">
+            <div class="h-32 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center relative">
+                <i class="fa-solid fa-star text-5xl text-indigo-200"></i>
                 <div class="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-                    HM Committed
+                    HM COMMITTED
                 </div>
             </div>
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-3">
-                    <h3 class="text-base font-bold text-slate-900 leading-tight">{{ project.name }}</h3>
-                </div>
-                <p class="text-xs text-slate-600 mb-5 font-medium flex items-center">
-                    <i class="fa-solid fa-location-dot text-brand-600 mr-2"></i>
+            <div class="p-4">
+                <h3 class="text-base font-bold text-slate-900 leading-tight mb-2">{{ project.name }}</h3>
+                <p class="text-xs text-rose-600 mb-4 font-medium flex items-center">
+                    <i class="fa-solid fa-location-dot mr-1.5"></i>
                     {{ project.dept }} | {{ project.loc }}
                 </p>
 
-                <div class="space-y-3">
-                    <div>
-                        <div class="flex justify-between text-xs mb-2">
-                            <span class="text-slate-600 font-semibold">Physical Progress</span>
-                            <span class="font-bold text-slate-900">{{ project.physical }}%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2.5 shadow-inner">
-                            <div class="bg-gradient-to-r from-brand-500 to-brand-600 h-2.5 rounded-full shadow-sm transition-all duration-500" [style.width.%]="project.physical"></div>
-                        </div>
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <span class="text-slate-500 font-semibold">PROGRESS</span>
+                        <span class="font-bold text-slate-900">{{ project.physical }}%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" [style.width.%]="project.physical"></div>
                     </div>
                 </div>
 
                 <button (click)="openProjectDetails(project.id)"
-                    class="w-full mt-5 py-2.5 bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 hover:from-brand-50 hover:to-brand-100 hover:text-brand-900 text-sm font-semibold rounded-xl border border-slate-200 hover:border-brand-300 transition-all duration-200 shadow-sm">
-                    Check Status <i class="fa-solid fa-arrow-right ml-1"></i>
+                    class="w-full mt-4 py-2 bg-slate-50 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 text-sm font-semibold rounded-xl border border-slate-200 hover:border-indigo-200 transition-all duration-200">
+                    Check Status <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
                 </button>
             </div>
         </div>
     </div>
+</div>
 </div>
