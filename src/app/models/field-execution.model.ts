@@ -19,5 +19,6 @@ export interface FieldProject {
   estimatedCost: number;
   status: 'N/S' | 'In Progress' | 'Completed' | 'Stuck';
   executant?: string;
+  executantNumber?: string;
   remarks?: string;
 }

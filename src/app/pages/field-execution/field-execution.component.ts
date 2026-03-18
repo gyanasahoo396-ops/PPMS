@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FieldExecutionService } from '../../services/field-execution.service';
 import { Block, GramPanchayat, FieldProject } from '../../models/field-execution.model';
