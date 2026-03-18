@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { filter, map, take, tap } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -13,16 +13,10 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // Otherwise wait for the first definitive (non-null) Firebase auth emission.
-  // Using filter(u => u !== null) prevents the guard from acting on the
-  // transient null emitted before Firebase resolves the cached session.
+  // Wait for the first definitive Firebase auth emission, then either
+  // allow navigation (authenticated) or redirect to login (unauthenticated).
   return authService.authState$.pipe(
-    filter(user => user !== null),
     take(1),
-    map(() => true),
-    // Timeout fallback: if Firebase never resolves (e.g. offline), redirect.
-    tap({
-      error: () => router.navigate(['/login'], { queryParams: { returnUrl: state.url } })
-    })
+    map(user => user ? true : router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } }))
   );
 };
