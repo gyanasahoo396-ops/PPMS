@@ -9,6 +9,7 @@ export interface SchemeProject {
   roadName: string;
   lengthKm?: number;
   costLakh: number;
+  spentLakh?: number;
   status?: 'Completed' | 'In Progress' | 'Stuck' | 'Planned';
 }
 
@@ -649,6 +650,76 @@ export class DepartmentSchemesService {
   getDepartments(): DepartmentEntry[] {
     this.applyPatches();
     return this.departments;
+  }
+
+  /** Replace in-memory departments with data loaded from Firestore */
+  setDepartments(depts: DepartmentEntry[]): void {
+    this.departments = depts;
+  }
+
+  updateProjectInScheme(deptName: string, schemeName: string, slNo: number, updates: Partial<SchemeProject>): void {
+    const dept = this.departments.find(d => d.name === deptName);
+    if (!dept) return;
+    const scheme = dept.schemes.find(s => s.name === schemeName);
+    if (!scheme?.projectList) return;
+    const idx = scheme.projectList.findIndex(p => p.slNo === slNo);
+    if (idx === -1) return;
+    scheme.projectList[idx] = { ...scheme.projectList[idx], ...updates };
+    // Recalculate summary stats
+    scheme.projects  = scheme.projectList.length;
+    scheme.totalCost = parseFloat((scheme.projectList.reduce((s, p) => s + p.costLakh, 0) / 100).toFixed(2));
+    scheme.spent     = parseFloat((scheme.projectList.reduce((s, p) => s + (p.spentLakh ?? 0), 0) / 100).toFixed(2));
+    if (scheme.roadLength !== undefined) {
+      scheme.roadLength = parseFloat(scheme.projectList.reduce((s, p) => s + (p.lengthKm ?? 0), 0).toFixed(2));
+    }
+    scheme.completed  = scheme.projectList.filter(p => p.status === 'Completed').length;
+    scheme.inProgress = scheme.projectList.filter(p => p.status === 'In Progress').length;
+    scheme.stuck      = scheme.projectList.filter(p => p.status === 'Stuck').length;
+    scheme.planned    = scheme.projectList.filter(p => !p.status || p.status === 'Planned').length;
+  }
+
+  addProjectToScheme(deptName: string, schemeName: string, project: Omit<SchemeProject, 'slNo'>, slNo?: number): void {
+    const dept = this.departments.find(d => d.name === deptName);
+    if (!dept) return;
+    const scheme = dept.schemes.find(s => s.name === schemeName);
+    if (!scheme) return;
+
+    if (!scheme.projectList) scheme.projectList = [];
+    const assignedSlNo = slNo ?? (scheme.projectList.length + 1);
+    scheme.projectList.push({ ...project, slNo: assignedSlNo });
+
+    // Recompute summary stats from the full list
+    scheme.projects  = scheme.projectList.length;
+    scheme.totalCost = parseFloat((scheme.projectList.reduce((s, p) => s + p.costLakh, 0) / 100).toFixed(2));
+    scheme.spent     = parseFloat((scheme.projectList.reduce((s, p) => s + (p.spentLakh ?? 0), 0) / 100).toFixed(2));
+    if (project.lengthKm !== undefined) {
+      scheme.roadLength = parseFloat(scheme.projectList.reduce((s, p) => s + (p.lengthKm ?? 0), 0).toFixed(2));
+    }
+    scheme.completed  = scheme.projectList.filter(p => p.status === 'Completed').length;
+    scheme.inProgress = scheme.projectList.filter(p => p.status === 'In Progress').length;
+    scheme.stuck      = scheme.projectList.filter(p => p.status === 'Stuck').length;
+    scheme.planned    = scheme.projectList.filter(p => !p.status || p.status === 'Planned').length;
+  }
+
+  deleteProjectFromScheme(deptName: string, schemeName: string, slNo: number): void {
+    const dept = this.departments.find(d => d.name === deptName);
+    if (!dept) return;
+    const scheme = dept.schemes.find(s => s.name === schemeName);
+    if (!scheme?.projectList) return;
+    scheme.projectList = scheme.projectList.filter(p => p.slNo !== slNo);
+    // Re-number sequentially
+    scheme.projectList.forEach((p, i) => p.slNo = i + 1);
+    // Recalculate summary stats
+    scheme.projects  = scheme.projectList.length;
+    scheme.totalCost = parseFloat((scheme.projectList.reduce((s, p) => s + p.costLakh, 0) / 100).toFixed(2));
+    scheme.spent     = parseFloat((scheme.projectList.reduce((s, p) => s + (p.spentLakh ?? 0), 0) / 100).toFixed(2));
+    if (scheme.roadLength !== undefined) {
+      scheme.roadLength = parseFloat(scheme.projectList.reduce((s, p) => s + (p.lengthKm ?? 0), 0).toFixed(2));
+    }
+    scheme.completed  = scheme.projectList.filter(p => p.status === 'Completed').length;
+    scheme.inProgress = scheme.projectList.filter(p => p.status === 'In Progress').length;
+    scheme.stuck      = scheme.projectList.filter(p => p.status === 'Stuck').length;
+    scheme.planned    = scheme.projectList.filter(p => !p.status || p.status === 'Planned').length;
   }
 
   getDepartmentByName(name: string): DepartmentEntry | undefined {

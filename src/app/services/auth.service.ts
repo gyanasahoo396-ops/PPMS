@@ -33,22 +33,59 @@ export class AuthService {
       if (firebaseUser) {
         this.isAuthenticated.set(true);
         try {
-          // Fetch user data from Firestore — must run inside injection context
-          // because AngularFire internally calls inject() in getDoc/doc APIs.
           const userData = await runInInjectionContext(this.injector, () =>
             this.userService.getUserByUid(firebaseUser.uid)
           );
-          this.currentUser.set(userData);
+          if (userData) {
+            // Cache role so it survives offline sessions
+            localStorage.setItem(`ppms_role_${firebaseUser.uid}`, userData.role);
+            this.currentUser.set(userData);
+          } else {
+            // Doc doesn't exist yet — auto-provision Firestore profile on first login
+            const created = await runInInjectionContext(this.injector, () =>
+              this.userService.createSelfProfile(firebaseUser)
+            );
+            localStorage.setItem(`ppms_role_${firebaseUser.uid}`, created.role);
+            this.currentUser.set(created);
+          }
         } catch (error) {
-          console.error('Error fetching user data:', error);
-          // Still mark as authenticated even if Firestore fetch fails
-          this.currentUser.set(null);
+          // Firestore offline — restore role from localStorage cache so save/edit buttons remain enabled
+          console.warn('Firestore offline — using cached role for fallback.');
+          const cachedRole = localStorage.getItem(`ppms_role_${firebaseUser.uid}`) ?? 'viewer';
+          this.currentUser.set({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email ?? '',
+            displayName: firebaseUser.displayName ?? firebaseUser.email?.split('@')[0] ?? 'User',
+            role: cachedRole as any,
+            createdAt: new Date(),
+            isActive: true,
+          } as any);
+          this.scheduleFirestoreRetry(firebaseUser.uid);
         }
       } else {
         this.isAuthenticated.set(false);
         this.currentUser.set(null);
       }
     });
+  }
+
+  /** Retry loading full user profile from Firestore after a delay (handles offline startup) */
+  private scheduleFirestoreRetry(uid: string, attempt = 1): void {
+    const delayMs = Math.min(attempt * 3000, 15000); // 3s, 6s, 9s … max 15s
+    setTimeout(() => {
+      runInInjectionContext(this.injector, () => this.userService.getUserByUid(uid))
+        .then(userData => {
+          if (userData) {
+            localStorage.setItem(`ppms_role_${uid}`, userData.role);
+            this.currentUser.set(userData);
+          } else if (attempt < 5) {
+            this.scheduleFirestoreRetry(uid, attempt + 1);
+          }
+        })
+        .catch(() => {
+          if (attempt < 5) this.scheduleFirestoreRetry(uid, attempt + 1);
+        });
+    }, delayMs);
   }
 
   /**

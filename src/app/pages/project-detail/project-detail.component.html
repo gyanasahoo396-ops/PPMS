@@ -1,131 +1,338 @@
-<div *ngIf="project"
-    class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+<!-- Loading state -->
+@if (!project()) {
+  <div class="fixed inset-0 bg-slate-900/75 z-50 flex items-center justify-center">
+    <div class="text-white flex flex-col items-center gap-3">
+      <i class="fa-solid fa-spinner animate-spin text-3xl"></i>
+      <p class="text-sm font-medium">Loading project…</p>
+    </div>
+  </div>
+}
+
+@if (project()) {
+
+  <!-- Delete Confirmation Overlay -->
+  @if (showDeleteConfirm()) {
+    <div class="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
+         role="alertdialog" aria-modal="true" aria-labelledby="del-title">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+        <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-trash-can text-red-600 text-xl"></i>
+        </div>
+        <h3 id="del-title" class="text-lg font-bold text-slate-900 mb-2">Delete Project?</h3>
+        <p class="text-sm text-slate-600 mb-6">
+          "<strong>{{ project()!.name }}</strong>" will be permanently removed. This cannot be undone.
+        </p>
+        <div class="flex gap-3 justify-center">
+          <button (click)="cancelDelete()" [disabled]="isDeleting()"
+                  class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition disabled:opacity-50">
+            Cancel
+          </button>
+          <button (click)="deleteProject()" [disabled]="isDeleting()"
+                  class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2">
+            @if (isDeleting()) {
+              <i class="fa-solid fa-spinner animate-spin"></i> Deleting…
+            } @else {
+              <i class="fa-solid fa-trash-can"></i> Delete
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Main Modal -->
+  <div class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl shadow-professional-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border-2 border-slate-200">
 
-        <!-- Modal Header -->
-        <div class="px-6 py-5 border-b-2 border-slate-100 flex justify-between items-center bg-gradient-to-r from-brand-50 to-indigo-50">
-            <div>
-                <span class="text-xs font-bold text-brand-700 uppercase tracking-wider bg-brand-100 px-2 py-1 rounded-lg">{{ project.dept }}</span>
-                <h2 class="text-2xl font-bold text-slate-900 mt-2">{{ project.name }}</h2>
-                <p class="text-sm text-slate-600 flex items-center gap-2 mt-1 font-medium">
-                    <i class="fa-solid fa-location-dot text-brand-600"></i> {{ project.loc }}
-                </p>
-            </div>
-            <button (click)="close()"
-                class="text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white transition-all shadow-sm">
-                <i class="fa-solid fa-times text-xl"></i>
+      <!-- Modal Header -->
+      <div class="px-6 py-5 border-b-2 border-slate-100 flex justify-between items-start gap-4 bg-gradient-to-r from-brand-50 to-indigo-50 flex-shrink-0">
+        <div class="flex-1 min-w-0">
+          <span class="text-xs font-bold text-brand-700 uppercase tracking-wider bg-brand-100 px-2 py-1 rounded-lg">{{ project()!.dept }}</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-2 break-words">{{ project()!.name }}</h2>
+          <p class="text-sm text-slate-600 flex items-center gap-2 mt-1 font-medium">
+            <i class="fa-solid fa-location-dot text-brand-600"></i> {{ project()!.loc }}
+          </p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          @if (canEdit() && !isEditMode()) {
+            <button (click)="openEditForm()"
+                    class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                    aria-label="Edit project">
+              <i class="fa-solid fa-pen-to-square"></i> Edit
             </button>
+            @if (isFirestoreDoc()) {
+              <button (click)="confirmDelete()"
+                      class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 transition"
+                      aria-label="Delete project">
+                <i class="fa-solid fa-trash-can"></i> Delete
+              </button>
+            }
+          }
+          <button (click)="close()"
+                  class="text-slate-400 hover:text-slate-700 w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white transition ml-1"
+                  aria-label="Close">
+            <i class="fa-solid fa-times text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== EDIT FORM ===== -->
+      @if (isEditMode()) {
+        <div class="flex-1 overflow-y-auto p-6 custom-scroll">
+          <form [formGroup]="editForm" (ngSubmit)="saveEdit()" novalidate class="space-y-5">
+
+            <!-- Name -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-name">
+                Project Name <span class="text-red-500" aria-hidden="true">*</span>
+              </label>
+              <input id="ep-name" type="text" formControlName="name"
+                     class="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                     [class.border-red-400]="editForm.get('name')?.invalid && editForm.get('name')?.touched"
+                     [class.border-slate-300]="!(editForm.get('name')?.invalid && editForm.get('name')?.touched)"
+                     aria-required="true" />
+              @if (editForm.get('name')?.invalid && editForm.get('name')?.touched) {
+                <p class="text-xs text-red-500 mt-1" role="alert">Name is required (min 3 characters).</p>
+              }
+            </div>
+
+            <!-- Dept + Location -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-dept">
+                  Department <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <select id="ep-dept" formControlName="dept"
+                        class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        aria-required="true">
+                  @for (d of departments; track d) {
+                    <option [value]="d">{{ d }}</option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-loc">
+                  Location <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <input id="ep-loc" type="text" formControlName="loc"
+                       class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                       aria-required="true" />
+              </div>
+            </div>
+
+            <!-- Status + Priority -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-status">
+                  Status <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <select id="ep-status" formControlName="status"
+                        class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        aria-required="true">
+                  @for (s of statusOptions; track s) {
+                    <option [value]="s">{{ s }}</option>
+                  }
+                </select>
+              </div>
+              <div class="flex items-end pb-1">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="priority" class="w-4 h-4 rounded accent-indigo-600" />
+                  <span class="text-sm font-medium text-slate-700">Priority Project</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Cost + Spent + Physical -->
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-cost">
+                  Cost (₹ Lakh) <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <input id="ep-cost" type="number" formControlName="cost" min="0" step="0.01"
+                       class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                       aria-required="true" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-spent">
+                  Spent (₹ Lakh) <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <input id="ep-spent" type="number" formControlName="spent" min="0" step="0.01"
+                       class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                       aria-required="true" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-physical">
+                  Progress (%) <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <input id="ep-physical" type="number" formControlName="physical" min="0" max="100"
+                       class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                       aria-required="true" />
+                @if (editForm.get('physical')?.invalid && editForm.get('physical')?.touched) {
+                  <p class="text-xs text-red-500 mt-1" role="alert">Must be 0–100.</p>
+                }
+              </div>
+            </div>
+
+            <!-- Start + End -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-start">
+                  Start Date <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <input id="ep-start" type="date" formControlName="start"
+                       class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                       aria-required="true" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-end">
+                  Target Completion <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <input id="ep-end" type="date" formControlName="end"
+                       class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                       aria-required="true" />
+              </div>
+            </div>
+
+            <!-- Remarks -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="ep-remarks">
+                Remarks / Issues
+              </label>
+              <textarea id="ep-remarks" formControlName="remarks" rows="3"
+                        class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"></textarea>
+            </div>
+
+            @if (saveError()) {
+              <p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> {{ saveError() }}
+              </p>
+            }
+
+          </form>
         </div>
 
-        <!-- Modal Content (Scrollable) -->
+        <!-- Edit footer -->
+        <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 flex-shrink-0">
+          <button (click)="cancelEdit()" [disabled]="isSaving()"
+                  class="px-4 py-2 border border-slate-300 bg-white text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-100 transition disabled:opacity-50">
+            Cancel
+          </button>
+          <button (click)="saveEdit()" [disabled]="isSaving()"
+                  class="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+            @if (isSaving()) {
+              <i class="fa-solid fa-spinner animate-spin" aria-hidden="true"></i> Saving…
+            } @else {
+              <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save Changes
+            }
+          </button>
+        </div>
+      }
+
+      <!-- ===== VIEW MODE ===== -->
+      @if (!isEditMode()) {
         <div class="p-6 overflow-y-auto custom-scroll">
 
-            <!-- Top Details Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <!-- Status Card -->
-                <div class="bg-gradient-to-br from-slate-50 to-slate-100 p-5 rounded-2xl border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                    <p class="text-xs text-slate-600 uppercase font-bold tracking-wider mb-3">Physical Status</p>
-                    <div class="flex items-center gap-3 mt-2">
-                        <span class="badge-professional" [ngClass]="getStatusClass(project.status)">
-                            {{ project.status }}
-                        </span>
-                        <span class="text-2xl font-bold text-slate-900">{{ project.physical }}%</span>
-                    </div>
-                    <div class="w-full bg-slate-200 rounded-full h-2.5 mt-3 shadow-inner">
-                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full shadow-sm transition-all duration-500" [style.width.%]="project.physical"></div>
-                    </div>
-                </div>
-
-                <!-- Financial Card -->
-                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-2xl border-2 border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
-                    <p class="text-xs text-emerald-700 uppercase font-bold tracking-wider mb-3">Financials</p>
-                    <div class="flex justify-between items-end mt-2">
-                        <div>
-                            <p class="text-xs text-emerald-600 font-semibold">Sanctioned</p>
-                            <p class="text-xl font-bold text-slate-900">₹{{ project.cost }}L</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs text-emerald-600 font-semibold">Utilized</p>
-                            <p class="text-xl font-bold text-emerald-700">₹{{ project.spent }}L</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Timeline Card -->
-                <div class="bg-gradient-to-br from-brand-50 to-indigo-100 p-5 rounded-2xl border-2 border-brand-200 shadow-sm hover:shadow-md transition-shadow">
-                    <p class="text-xs text-brand-700 uppercase font-bold tracking-wider mb-3">Timeline</p>
-                    <div class="mt-2 text-sm space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-brand-600 font-semibold">Start:</span>
-                            <span class="font-bold text-slate-900">{{ project.start }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-brand-600 font-semibold">Target:</span>
-                            <span class="font-bold text-slate-900">{{ project.end }}</span>
-                        </div>
-                    </div>
-                </div>
+          <!-- Top Details Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Status Card -->
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 p-5 rounded-2xl border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <p class="text-xs text-slate-600 uppercase font-bold tracking-wider mb-3">Physical Status</p>
+              <div class="flex items-center gap-3 mt-2">
+                <span [class]="'badge-professional ' + getStatusClass(project()!.status)">{{ project()!.status }}</span>
+                <span class="text-2xl font-bold text-slate-900">{{ project()!.physical }}%</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-2.5 mt-3 shadow-inner">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full shadow-sm transition-all duration-500"
+                     [style.width.%]="project()!.physical"></div>
+              </div>
             </div>
 
-            <!-- Before/After Photos Section -->
-            <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                <span class="w-1.5 h-8 bg-brand-600 rounded-full"></span>
-                <i class="fa-solid fa-camera text-brand-600"></i> Field Inspection Photos
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-                <!-- Before Photo -->
-                <div class="border-2 border-slate-200 rounded-2xl overflow-hidden bg-slate-50 shadow-sm hover:shadow-md transition-all">
-                    <div class="h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative group">
-                        <i class="fa-solid fa-image text-5xl text-slate-300"></i>
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all">
-                        </div>
-                        <div
-                            class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                            <i class="fa-solid fa-calendar-days"></i> 01 Jan 2023
-                        </div>
-                    </div>
-                    <div class="p-3 bg-white">
-                        <p class="font-bold text-slate-700 text-sm">Before Execution</p>
-                        <p class="text-xs text-slate-500 mt-1">Geo: 20.945° N, 86.452° E</p>
-                    </div>
+            <!-- Financial Card -->
+            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-2xl border-2 border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
+              <p class="text-xs text-emerald-700 uppercase font-bold tracking-wider mb-3">Financials</p>
+              <div class="flex justify-between items-end mt-2">
+                <div>
+                  <p class="text-xs text-emerald-600 font-semibold">Sanctioned</p>
+                  <p class="text-xl font-bold text-slate-900">₹{{ project()!.cost }}L</p>
                 </div>
-
-                <!-- After/Current Photo -->
-                <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-100">
-                    <div class="h-48 bg-slate-200 flex items-center justify-center relative group">
-                        <i class="fa-solid fa-image text-4xl text-slate-300"></i>
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all">
-                        </div>
-                        <div
-                            class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                            <i class="fa-solid fa-calendar-days"></i> 15 Oct 2023
-                        </div>
-                    </div>
-                    <div class="p-3 bg-white">
-                        <p class="font-bold text-slate-700 text-sm">Current Status</p>
-                        <p class="text-xs text-slate-500 mt-1">Geo: 20.945° N, 86.452° E</p>
-                    </div>
+                <div class="text-right">
+                  <p class="text-xs text-emerald-600 font-semibold">Utilized</p>
+                  <p class="text-xl font-bold text-emerald-700">₹{{ project()!.spent }}L</p>
                 </div>
+              </div>
             </div>
 
-            <!-- Description / Remarks -->
-            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                <h4 class="text-sm font-bold text-indigo-900 mb-2">Remarks / Issues</h4>
-                <p class="text-sm text-indigo-800 leading-relaxed">{{ project.remarks }}</p>
+            <!-- Timeline Card -->
+            <div class="bg-gradient-to-br from-brand-50 to-indigo-100 p-5 rounded-2xl border-2 border-brand-200 shadow-sm hover:shadow-md transition-shadow">
+              <p class="text-xs text-brand-700 uppercase font-bold tracking-wider mb-3">Timeline</p>
+              <div class="mt-2 text-sm space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-brand-600 font-semibold">Start:</span>
+                  <span class="font-bold text-slate-900">{{ project()!.start }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-brand-600 font-semibold">Target:</span>
+                  <span class="font-bold text-slate-900">{{ project()!.end }}</span>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- Field Inspection Photos -->
+          <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+            <span class="w-1.5 h-8 bg-brand-600 rounded-full"></span>
+            <i class="fa-solid fa-camera text-brand-600" aria-hidden="true"></i> Field Inspection Photos
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+            <div class="border-2 border-slate-200 rounded-2xl overflow-hidden bg-slate-50 shadow-sm hover:shadow-md transition-all">
+              <div class="h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative group">
+                <i class="fa-solid fa-image text-5xl text-slate-300" aria-hidden="true"></i>
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all"></div>
+                <div class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                  <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> 01 Jan 2023
+                </div>
+              </div>
+              <div class="p-3 bg-white">
+                <p class="font-bold text-slate-700 text-sm">Before Execution</p>
+                <p class="text-xs text-slate-500 mt-1">Geo: 20.945° N, 86.452° E</p>
+              </div>
+            </div>
+            <div class="border-2 border-slate-200 rounded-2xl overflow-hidden bg-slate-50 shadow-sm hover:shadow-md transition-all">
+              <div class="h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative group">
+                <i class="fa-solid fa-image text-5xl text-slate-300" aria-hidden="true"></i>
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all"></div>
+                <div class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                  <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> 15 Oct 2023
+                </div>
+              </div>
+              <div class="p-3 bg-white">
+                <p class="font-bold text-slate-700 text-sm">Current Status</p>
+                <p class="text-xs text-slate-500 mt-1">Geo: 20.945° N, 86.452° E</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Remarks -->
+          <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+            <h4 class="text-sm font-bold text-indigo-900 mb-2">Remarks / Issues</h4>
+            <p class="text-sm text-indigo-800 leading-relaxed">{{ project()!.remarks }}</p>
+          </div>
 
         </div>
 
-        <!-- Modal Footer -->
-        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 text-right">
-            <button (click)="close()"
-                class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-100 mr-2">
-                Close
-            </button>
-            <button
-                class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow-sm">
-                <i class="fa-solid fa-file-pdf mr-1"></i> Download Report
-            </button>
+        <!-- View footer -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 flex-shrink-0">
+          <button (click)="close()"
+                  class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-100 transition">
+            Close
+          </button>
+          <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow-sm">
+            <i class="fa-solid fa-file-pdf mr-1" aria-hidden="true"></i> Download Report
+          </button>
         </div>
+      }
+
     </div>
-</div>
+  </div>
+
+}

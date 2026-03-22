@@ -3,9 +3,29 @@
 <app-mobile-page-header title="Dashboard Overview" (back)="goToHome()" class="-mx-4 -mt-4 block md:hidden" />
 
 <div class="space-y-4 sm:space-y-6 mt-4 md:mt-0">
-    <!-- Last Updated (desktop only) -->
-    <div class="hidden md:block text-xs text-slate-500 font-medium">
-        Last Updated: 15/04/2024 02:00 PM
+    <!-- Toolbar row -->
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+        <p class="hidden md:block text-xs text-slate-500 font-medium">
+            Last Updated: <span class="font-semibold">Real-time (Firestore)</span>
+        </p>
+        <div class="flex items-center gap-2 ml-auto">
+            <!-- Admin: seed static data to Firestore -->
+            @if (isAdmin()) {
+                <button (click)="seedStaticDataToFirestore()" [disabled]="isSeeding()"
+                    class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (isSeeding()) {
+                        <i class="fa-solid fa-spinner animate-spin"></i> Seeding…
+                    } @else {
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Seed to Firestore
+                    }
+                </button>
+            }
+            <!-- Add new project -->
+            <button (click)="openNewProjectModal()"
+                class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition">
+                <i class="fa-solid fa-plus"></i> Add Project
+            </button>
+        </div>
     </div>
 
     <!-- KPI Cards -->
@@ -135,3 +155,184 @@
 
 </div>
 </div>
+
+<!-- ============================================================
+     CREATE PROJECT MODAL
+     ============================================================ -->
+@if (showNewProjectModal()) {
+<div class="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 pt-12 backdrop-blur-sm"
+     (click)="closeNewProjectModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
+         (click)="$event.stopPropagation()"
+         role="dialog" aria-modal="true" aria-labelledby="create-proj-title">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-blue-50 flex-shrink-0">
+            <div>
+                <h2 id="create-proj-title" class="text-lg font-bold text-slate-900">Create New Project</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Saved directly to Firestore</p>
+            </div>
+            <button (click)="closeNewProjectModal()" aria-label="Close"
+                    class="text-slate-400 hover:text-slate-600 w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="overflow-y-auto p-6">
+            <form [formGroup]="newProjectForm" (ngSubmit)="createProject()" novalidate class="space-y-4">
+
+                <!-- Name -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-name">
+                        Project Name <span class="text-red-500">*</span>
+                    </label>
+                    <input id="np-name" type="text" formControlName="name"
+                           placeholder="Enter project name…"
+                           class="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                           [class.border-red-400]="newProjectForm.get('name')?.invalid && newProjectForm.get('name')?.touched"
+                           [class.border-slate-300]="!(newProjectForm.get('name')?.invalid && newProjectForm.get('name')?.touched)" />
+                    @if (newProjectForm.get('name')?.invalid && newProjectForm.get('name')?.touched) {
+                        <p class="text-xs text-red-500 mt-1">Name is required (min 3 characters).</p>
+                    }
+                </div>
+
+                <!-- Dept + Loc -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-dept">
+                            Department <span class="text-red-500">*</span>
+                        </label>
+                        <select id="np-dept" formControlName="dept"
+                                class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            <option value="">Select…</option>
+                            @for (d of departments; track d) {
+                                <option [value]="d">{{ d }}</option>
+                            }
+                        </select>
+                        @if (newProjectForm.get('dept')?.invalid && newProjectForm.get('dept')?.touched) {
+                            <p class="text-xs text-red-500 mt-1">Required.</p>
+                        }
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-loc">
+                            Location <span class="text-red-500">*</span>
+                        </label>
+                        <input id="np-loc" type="text" formControlName="loc"
+                               placeholder="e.g. Dhamnagar Block"
+                               class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    </div>
+                </div>
+
+                <!-- Status + Priority -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-status">
+                            Status <span class="text-red-500">*</span>
+                        </label>
+                        <select id="np-status" formControlName="status"
+                                class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            @for (s of statusOptions; track s) {
+                                <option [value]="s">{{ s }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="flex items-end pb-1">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" formControlName="priority" class="w-4 h-4 rounded accent-indigo-600" />
+                            <span class="text-sm font-medium text-slate-700">Mark as Priority</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Cost + Spent + Physical -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-cost">
+                            Cost (₹ Lakh) <span class="text-red-500">*</span>
+                        </label>
+                        <input id="np-cost" type="number" formControlName="cost" min="0" step="0.01"
+                               placeholder="e.g. 850"
+                               class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                        @if (newProjectForm.get('cost')?.invalid && newProjectForm.get('cost')?.touched) {
+                            <p class="text-xs text-red-500 mt-1">Required, must be ≥ 0.</p>
+                        }
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-spent">
+                            Spent (₹ Lakh)
+                        </label>
+                        <input id="np-spent" type="number" formControlName="spent" min="0" step="0.01"
+                               placeholder="0"
+                               class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-physical">
+                            Progress (%)
+                        </label>
+                        <input id="np-physical" type="number" formControlName="physical" min="0" max="100"
+                               placeholder="0"
+                               class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    </div>
+                </div>
+
+                <!-- Start + End dates -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-start">
+                            Start Date <span class="text-red-500">*</span>
+                        </label>
+                        <input id="np-start" type="date" formControlName="start"
+                               class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-end">
+                            Target Completion <span class="text-red-500">*</span>
+                        </label>
+                        <input id="np-end" type="date" formControlName="end"
+                               class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                        @if (newProjectForm.get('end')?.invalid && newProjectForm.get('end')?.touched) {
+                            <p class="text-xs text-red-500 mt-1">Required.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Remarks -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-remarks">
+                        Remarks
+                    </label>
+                    <textarea id="np-remarks" formControlName="remarks" rows="2"
+                              placeholder="Any notes, issues, or context…"
+                              class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"></textarea>
+                </div>
+
+                <!-- Error -->
+                @if (saveError()) {
+                    <p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> {{ saveError() }}
+                    </p>
+                }
+
+            </form>
+        </div>
+
+        <!-- Modal footer -->
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 flex-shrink-0">
+            <button (click)="closeNewProjectModal()"
+                    class="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 transition">
+                Cancel
+            </button>
+            <button (click)="createProject()" [disabled]="isSaving()"
+                    class="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed">
+                @if (isSaving()) {
+                    <i class="fa-solid fa-spinner animate-spin"></i> Saving…
+                } @else {
+                    <i class="fa-solid fa-floppy-disk"></i> Create Project
+                }
+            </button>
+        </div>
+
+    </div>
+</div>
+}

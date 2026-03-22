@@ -55,6 +55,24 @@
         </div>
       </div>
 
+      <!-- Admin toolbar: Firestore status + seed button (admin only) -->
+      @if (isAdmin()) {
+        <div class="dept-admin-bar">
+          <span class="dept-fs-badge" [class.dept-fs-live]="usingFirestore">
+            <i class="fa-solid fa-circle" style="font-size:7px"></i>
+            {{ usingFirestore ? 'Live · Firestore' : 'Static · Local' }}
+          </span>
+          <button class="btn-seed-depts" (click)="seedDepartmentsToFirestore()" [disabled]="isSeeding()">
+            @if (isSeeding()) {
+              <i class="fa-solid fa-spinner animate-spin"></i> Seeding…
+            } @else {
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              {{ usingFirestore ? 'Re-seed to Firestore' : 'Seed All to Firestore' }}
+            }
+          </button>
+        </div>
+      }
+
       <!-- Summary strip -->
       <div class="scheme-summary-strip">
         <div class="summary-chip">
@@ -196,54 +214,198 @@
     </div>
   </div>
 
-  <!-- Drawer body: project table -->
-  <div class="drawer-body" *ngIf="drawerScheme!.projectList?.length; else noProjects">
-    <div class="drawer-table-wrap">
-      <table class="drawer-table" id="scheme-projects-table">
-        <thead>
-          <tr>
-            <th class="col-sl">Sl.</th>
-            <th class="col-road">{{ drawerScheme!.roadLength !== undefined ? 'Name of the Road' : 'Project / Scheme Name' }}</th>
-            <th class="col-dist">District</th>
-            <th class="col-div">Division / Block</th>
-            <th class="col-len" *ngIf="drawerScheme!.roadLength !== undefined">Length (km)</th>
-            <th class="col-cost">Approx. Cost (₹ Lakh)</th>
-            <th class="col-status">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let proj of drawerScheme!.projectList; let j = index"
-              [class.row-alt]="j % 2 !== 0">
-            <td class="col-sl td-center">{{ proj.slNo }}</td>
-            <td class="col-road td-road">{{ proj.roadName }}</td>
-            <td class="col-dist td-center">{{ proj.district }}</td>
-            <td class="col-div td-center">{{ proj.division }}</td>
-            <td class="col-len td-center td-bold" *ngIf="drawerScheme!.roadLength !== undefined">{{ proj.lengthKm?.toFixed(2) ?? '–' }}</td>
-            <td class="col-cost td-center td-bold">{{ proj.costLakh.toFixed(2) }}</td>
-            <td class="col-status td-center">
-              <span class="badge-professional" [ngClass]="getStatusClass(proj.status)">
-                {{ proj.status ?? 'Planned' }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr class="table-total-row">
-            <td [attr.colspan]="drawerScheme!.roadLength !== undefined ? 4 : 4" class="td-total-label">Total</td>
-            <td class="td-center td-bold" *ngIf="drawerScheme!.roadLength !== undefined">{{ drawerTotalLength.toFixed(2) }} km</td>
-            <td class="td-center td-bold">₹{{ drawerTotalCostLakh.toFixed(2) }} L</td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+  <!-- Drawer toolbar -->
+  <div class="drawer-toolbar">
+    @if (!showAddForm) {
+      <button class="btn-add-project" (click)="openAddProjectForm()">
+        <i class="fa-solid fa-plus"></i> Add Project
+      </button>
+    }
   </div>
 
-  <ng-template #noProjects>
-    <div class="drawer-empty">
-      <i class="fa-solid fa-folder-open"></i>
-      <p>No project data available yet for this scheme.</p>
-      <span>Data will be added as projects are sanctioned.</span>
+  <!-- Add Project Form -->
+  @if (showAddForm) {
+    <div class="add-project-form-wrap">
+      <div class="add-form-header">
+        <h3>
+          <i [class]="formMode === 'edit' ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-plus-circle'"></i>
+          {{ formMode === 'edit' ? 'Edit Project' : 'Add New Project' }}
+        </h3>
+        <button class="add-form-close" (click)="closeAddProjectForm()" aria-label="Close form">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="addProjectForm" (ngSubmit)="submitAddProject()" class="add-form-body" novalidate>
+
+        <!-- Row 0: Serial No. + Name -->
+        <div class="form-row">
+          <div class="form-field" style="max-width: 110px">
+            <label for="ap-slno">Sl. No. <span class="req">*</span></label>
+            <input id="ap-slno" type="number" formControlName="slNo" min="1" step="1" placeholder="1" />
+            @if (addProjectForm.get('slNo')?.invalid && addProjectForm.get('slNo')?.touched) {
+              <span class="field-error">Required, ≥ 1.</span>
+            }
+          </div>
+          <div class="form-field" style="flex:1">
+            <label for="ap-roadName">{{ drawerScheme!.roadLength !== undefined ? 'Road Name' : 'Project Name' }} <span class="req">*</span></label>
+          <input id="ap-roadName" type="text" formControlName="roadName"
+                 [placeholder]="drawerScheme!.roadLength !== undefined ? 'Enter road name…' : 'Enter project name…'" />
+            @if (addProjectForm.get('roadName')?.invalid && addProjectForm.get('roadName')?.touched) {
+              <span class="field-error">Name is required (min 3 characters).</span>
+            }
+          </div>
+        </div>
+
+        <!-- Row 2: District + Division -->
+        <div class="form-row">
+          <div class="form-field">
+            <label for="ap-district">District <span class="req">*</span></label>
+            <input id="ap-district" type="text" formControlName="district" placeholder="e.g. Bhadrak" />
+            @if (addProjectForm.get('district')?.invalid && addProjectForm.get('district')?.touched) {
+              <span class="field-error">Required.</span>
+            }
+          </div>
+          <div class="form-field">
+            <label for="ap-division">Division / Block <span class="req">*</span></label>
+            <input id="ap-division" type="text" formControlName="division" placeholder="e.g. Bhadrak-I" />
+            @if (addProjectForm.get('division')?.invalid && addProjectForm.get('division')?.touched) {
+              <span class="field-error">Required.</span>
+            }
+          </div>
+        </div>
+
+        <!-- Row 3: Constituency + Status -->
+        <div class="form-row">
+          <div class="form-field">
+            <label for="ap-const">Constituency <span class="req">*</span></label>
+            <input id="ap-const" type="text" formControlName="constituency" placeholder="e.g. Dhamnagar" />
+          </div>
+          <div class="form-field">
+            <label for="ap-status">Status <span class="req">*</span></label>
+            <select id="ap-status" formControlName="status">
+              <option value="Planned">Planned</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Stuck">Stuck</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 4: Cost + Spent (+ Length if road) -->
+        <div class="form-row">
+          @if (drawerHasLength) {
+            <div class="form-field">
+              <label for="ap-len">Length (km)</label>
+              <input id="ap-len" type="number" formControlName="lengthKm" min="0" step="0.01" placeholder="e.g. 5.25" />
+            </div>
+          }
+          <div class="form-field">
+            <label for="ap-cost">Approx. Cost (₹ Lakh) <span class="req">*</span></label>
+            <input id="ap-cost" type="number" formControlName="costLakh" min="0.01" step="0.01" placeholder="e.g. 850.00" />
+            @if (addProjectForm.get('costLakh')?.invalid && addProjectForm.get('costLakh')?.touched) {
+              <span class="field-error">Required, must be > 0.</span>
+            }
+          </div>
+          <div class="form-field">
+            <label for="ap-spent">Amount Spent (₹ Lakh)</label>
+            <input id="ap-spent" type="number" formControlName="spentLakh" min="0" step="0.01" placeholder="e.g. 200.00" />
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="add-form-actions">
+          <button type="button" class="btn-cancel" (click)="closeAddProjectForm()">Cancel</button>
+          <button type="submit" class="btn-submit">
+            <i class="fa-solid fa-floppy-disk"></i> {{ formMode === 'edit' ? 'Update Project' : 'Save Project' }}
+          </button>
+        </div>
+
+      </form>
     </div>
-  </ng-template>
+  }
+
+  <!-- Drawer body: project table -->
+  @if (!showAddForm) {
+    <div class="drawer-body" *ngIf="drawerScheme!.projectList?.length; else noProjects">
+      <div class="drawer-table-wrap">
+        <table class="drawer-table" id="scheme-projects-table">
+          <thead>
+            <tr>
+              <th class="col-sl">Sl.</th>
+              <th class="col-road">{{ drawerScheme!.roadLength !== undefined ? 'Name of the Road' : 'Project / Scheme Name' }}</th>
+              <th class="col-dist">District</th>
+              <th class="col-div">Division / Block</th>
+              <th class="col-len" *ngIf="drawerScheme!.roadLength !== undefined">Length (km)</th>
+              <th class="col-cost">Approx. Cost (₹ Lakh)</th>
+              <th class="col-status">Status</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let proj of drawerScheme!.projectList; let j = index"
+                [class.row-alt]="j % 2 !== 0"
+                [class.row-deleting]="deletingSlNo === proj.slNo">
+              <td class="col-sl td-center">{{ proj.slNo }}</td>
+              <td class="col-road td-road">{{ proj.roadName }}</td>
+              <td class="col-dist td-center">{{ proj.district }}</td>
+              <td class="col-div td-center">{{ proj.division }}</td>
+              <td class="col-len td-center td-bold" *ngIf="drawerScheme!.roadLength !== undefined">{{ proj.lengthKm?.toFixed(2) ?? '–' }}</td>
+              <td class="col-cost td-center td-bold">{{ proj.costLakh.toFixed(2) }}</td>
+              <td class="col-status td-center">
+                <select class="inline-status-select" [class]="getStatusClass(proj.status)"
+                        [value]="proj.status ?? 'Planned'"
+                        (change)="changeProjectStatus(proj, $any($event.target).value)"
+                        [attr.aria-label]="'Status for ' + proj.roadName">
+                  <option value="Planned">Planned</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Stuck">Stuck</option>
+                </select>
+              </td>
+              <td class="col-actions td-center">
+                @if (deletingSlNo === proj.slNo) {
+                  <div class="inline-confirm" role="group" [attr.aria-label]="'Confirm delete ' + proj.roadName">
+                    <span class="inline-confirm-text">Delete?</span>
+                    <button class="btn-confirm-yes" (click)="confirmDeleteProject(proj.slNo)" aria-label="Confirm delete">
+                      <i class="fa-solid fa-check"></i>
+                    </button>
+                    <button class="btn-confirm-no" (click)="cancelDeleteProject()" aria-label="Cancel delete">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                } @else {
+                  <button class="btn-row-edit" (click)="openEditProjectForm(proj)"
+                          [attr.aria-label]="'Edit ' + proj.roadName" title="Edit project">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  <button class="btn-row-delete" (click)="promptDeleteProject(proj.slNo)"
+                          [attr.aria-label]="'Delete ' + proj.roadName" title="Delete project">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="table-total-row">
+              <td [attr.colspan]="drawerScheme!.roadLength !== undefined ? 4 : 4" class="td-total-label">Total</td>
+              <td class="td-center td-bold" *ngIf="drawerScheme!.roadLength !== undefined">{{ drawerTotalLength.toFixed(2) }} km</td>
+              <td class="td-center td-bold">₹{{ drawerTotalCostLakh.toFixed(2) }} L</td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <ng-template #noProjects>
+      <div class="drawer-empty">
+        <i class="fa-solid fa-folder-open"></i>
+        <p>No project data available yet for this scheme.</p>
+        <span>Click <strong>Add Project</strong> above to get started.</span>
+      </div>
+    </ng-template>
+  }
 </div>

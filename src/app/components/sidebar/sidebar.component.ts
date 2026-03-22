@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal, computed, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ProjectDataService } from '../../services/project-data.service';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { FirestoreProjectService } from '../../services/firestore-project.service';
 
 @Component({
     selector: 'app-sidebar',
@@ -11,20 +12,28 @@ import { AuthService } from '../../services/auth.service';
     templateUrl: './sidebar.component.html',
     styleUrls: ['./sidebar.component.css']
 })
-export class SidebarComponent implements OnInit {
+export class SidebarComponent implements OnInit, OnDestroy {
     @Input() isOpen: boolean = false;
     @Output() closeSidebar = new EventEmitter<void>();
 
-    stuckCount: number = 0;
+    stuckCount = signal(0);
     isLoggingOut = signal(false);
 
-    private projectService = inject(ProjectDataService);
     private authService = inject(AuthService);
+    private firestoreService = inject(FirestoreProjectService);
+    private destroy$ = new Subject<void>();
 
     currentUser = computed(() => this.authService.currentUser());
 
     ngOnInit(): void {
-        this.stuckCount = this.projectService.getStuckProjects().length;
+        this.firestoreService.getStuckProjects$()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(stuck => this.stuckCount.set(stuck.length));
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     onLinkClick(): void {
