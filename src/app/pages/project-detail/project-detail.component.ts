@@ -52,12 +52,19 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             // Subscribe to real-time Firestore document
             this.firestoreService.getProjectById$(this.projectId)
                 .pipe(takeUntil(this.destroy$))
-                .subscribe(firestoreProject => {
-                    if (firestoreProject) {
-                        this.project.set(firestoreProject);
-                        this.isFirestoreDoc.set(true);
-                    } else {
-                        // Fall back to static/hardcoded data
+                .subscribe({
+                    next: firestoreProject => {
+                        if (firestoreProject) {
+                            this.project.set(firestoreProject);
+                            this.isFirestoreDoc.set(true);
+                        } else {
+                            // Fall back to static/hardcoded data
+                            this.project.set(this.projectService.getProjectById(this.projectId));
+                            this.isFirestoreDoc.set(false);
+                        }
+                    },
+                    error: err => {
+                        console.error('Failed to load project from Firestore:', err);
                         this.project.set(this.projectService.getProjectById(this.projectId));
                         this.isFirestoreDoc.set(false);
                     }

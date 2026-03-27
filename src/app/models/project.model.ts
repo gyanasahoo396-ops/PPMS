@@ -10,6 +10,8 @@ export interface Project {
     start: string;
     end: string;
     priority: boolean;
+    hmPriority?: boolean;           // HM Priority flag
+    recurringIntervention?: boolean; // Requires recurring intervention
     remarks: string;
     scheme?: string; // RD scheme category
     visibility?: 'High Visibility' | 'HM Committed'; // Special tag

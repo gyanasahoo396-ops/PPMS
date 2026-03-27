@@ -4,15 +4,14 @@ import {
   collection,
   doc,
   collectionData,
-  docData,
   addDoc,
   setDoc,
   updateDoc,
   deleteDoc,
   query,
-  where,
-  serverTimestamp
+  where
 } from '@angular/fire/firestore';
+import { serverTimestamp, DocumentReference } from 'firebase/firestore';
 import { Observable, map } from 'rxjs';
 import { Project, ProjectStats, StatusCount } from '../models/project.model';
 
@@ -29,7 +28,7 @@ export class FirestoreProjectService {
     { idField: 'id' }
   ) as Observable<Project[]>;
 
-  private run<T>(fn: () => T): T {
+  private injectCtx<T>(fn: () => T): T {
     return runInInjectionContext(this.injector, fn);
   }
 
@@ -50,7 +49,9 @@ export class FirestoreProjectService {
 
   /** Real-time single project by Firestore document ID */
   getProjectById$(id: string): Observable<Project | undefined> {
-    return this.run(() => docData(doc(this.col, id), { idField: 'id' })) as Observable<Project | undefined>;
+    return this.allProjects$.pipe(
+      map(projects => projects.find(p => p.id === id))
+    );
   }
 
   /** Real-time stuck projects */
@@ -87,47 +88,70 @@ export class FirestoreProjectService {
 
   /** Create project with auto-generated Firestore ID */
   async createProject(project: Omit<Project, 'id'>): Promise<string> {
-    const ref = await this.withTimeout(this.run(() => addDoc(this.col, {
-      ...project,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    })));
+    // Strip undefined values — Firestore rejects them
+    const clean = Object.fromEntries(
+      Object.entries(project).filter(([, v]) => v !== undefined)
+    );
+    const ref = await this.withTimeout(
+      this.injectCtx(() => addDoc(this.col, {
+        ...clean,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }))
+    ) as DocumentReference;
     return ref.id;
   }
 
   /** Upsert project with a specific ID (used for seeding static data) */
   async setProject(id: string, project: Omit<Project, 'id'>): Promise<void> {
-    await this.withTimeout(this.run(() => setDoc(doc(this.col, id), {
-      ...project,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    })));
+    await this.withTimeout(
+      this.injectCtx(() => setDoc(doc(this.col, id), {
+        ...project,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }))
+    );
   }
 
   async updateProject(id: string, updates: Partial<Omit<Project, 'id'>>): Promise<void> {
-    await this.withTimeout(this.run(() => updateDoc(doc(this.col, id), {
-      ...updates,
-      updatedAt: serverTimestamp()
-    })));
+    const clean = Object.fromEntries(
+      Object.entries(updates).filter(([, v]) => v !== undefined)
+    );
+    await this.withTimeout(
+      this.injectCtx(() => updateDoc(doc(this.col, id), {
+        ...clean,
+        updatedAt: serverTimestamp()
+      }))
+    );
   }
 
   async deleteProject(id: string): Promise<void> {
-    await this.withTimeout(this.run(() => deleteDoc(doc(this.col, id))));
+    await this.withTimeout(
+      this.injectCtx(() => deleteDoc(doc(this.col, id)))
+    );
   }
 
   /**
    * Migrate all static/hardcoded projects to Firestore using their existing IDs.
    * Safe to call multiple times (upsert semantics via setDoc).
+   * Strips undefined values so Firestore doesn't reject optional fields.
    */
   async seedProjects(projects: Project[]): Promise<void> {
-    await Promise.all(
-      projects.map(({ id, ...data }) =>
-        this.run(() => setDoc(doc(this.col, id), {
-          ...data,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }))
-      )
+    await this.withTimeout(
+      Promise.all(
+        projects.map(({ id, ...data }) => {
+          // Remove keys whose value is undefined — Firestore rejects them
+          const clean = Object.fromEntries(
+            Object.entries(data).filter(([, v]) => v !== undefined)
+          );
+          return this.injectCtx(() => setDoc(doc(this.col, id), {
+            ...clean,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          }));
+        })
+      ),
+      30000  // allow up to 30 s for a batch of projects
     );
   }
 }

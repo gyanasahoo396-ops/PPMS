@@ -1,11 +1,14 @@
-import { Component, OnInit, HostListener, inject, computed, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { DepartmentSchemesService, DepartmentEntry, SchemeCard, SchemeProject } from '../../services/department-schemes.service';
 import { FirestoreDepartmentService } from '../../services/firestore-department.service';
+import { FirestoreProjectService } from '../../services/firestore-project.service';
 import { AuthService } from '../../services/auth.service';
 import { UserRole } from '../../models/user.model';
+import { Project } from '../../models/project.model';
 import { MobilePageHeaderComponent } from '../../components/mobile-page-header/mobile-page-header.component';
 
 @Component({
@@ -15,7 +18,7 @@ import { MobilePageHeaderComponent } from '../../components/mobile-page-header/m
     templateUrl: './departments.component.html',
     styleUrls: ['./departments.component.css']
 })
-export class DepartmentsComponent implements OnInit {
+export class DepartmentsComponent implements OnInit, OnDestroy {
     departments: DepartmentEntry[] = [];
     selectedDept: DepartmentEntry | null = null;
     searchQuery: string = '';
@@ -42,7 +45,22 @@ export class DepartmentsComponent implements OnInit {
     firestoreIds = new Map<string, string>(); // dept name → Firestore document ID
     isSeeding = signal(false);
 
+    private destroy$ = new Subject<void>();
+    // Baselines captured once so Firestore projects are additive, not replacing static counts
+    private baselineStats = new Map<string, { projects: number; totalCost: number; spent: number; completed: number; inProgress: number; stuck: number; planned: number }>();
+    // Maps project dept abbreviation → DepartmentEntry.shortName
+    private readonly deptAbbrToShortName: Record<string, string> = {
+        // Direct shortName pass-through (new projects store shortName as dept key)
+        'WR': 'WR', 'RD': 'RD', 'PWD': 'PWD', 'H&UD': 'H&UD',
+        'Sports': 'Sports', 'Health': 'Health', 'Tourism': 'Tourism',
+        'OLLC': 'OLLC', 'PR&DW': 'PR&DW', 'HE': 'HE', 'WCD': 'WCD', 'PC': 'PC',
+        // Legacy abbreviations (backward compat with existing Firestore projects)
+        'PR Block': 'PR&DW', 'RWSS': 'PR&DW',
+        'Culture': 'OLLC', 'Education': 'HE',
+    };
+
     private firestoreDeptService = inject(FirestoreDepartmentService);
+    private firestoreProjectService = inject(FirestoreProjectService);
     private authService = inject(AuthService);
 
     isAdmin = computed(() => {
@@ -80,6 +98,19 @@ export class DepartmentsComponent implements OnInit {
 
         // Upgrade to Firestore in the background (doesn't block rendering)
         this.loadFromFirestoreIfAvailable();
+
+        // Live Firestore projects → overlay into scheme cards
+        this.firestoreProjectService.getProjects$()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: projects => this.mergeFirestoreProjects(projects),
+                error: err => console.warn('Dept page: Firestore projects stream error', err)
+            });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     private loadFromFirestoreIfAvailable(): void {
@@ -98,6 +129,120 @@ export class DepartmentsComponent implements OnInit {
                 }
             })
             .catch(e => console.warn('Departments Firestore load failed — using static data.', e));
+    }
+
+    /** Capture original scheme stats once as baseline (idempotent). */
+    private captureBaselines(): void {
+        this.departments.forEach(dept =>
+            dept.schemes.forEach(scheme => {
+                const key = `${dept.name}::${scheme.name}`;
+                if (!this.baselineStats.has(key)) {
+                    this.baselineStats.set(key, {
+                        projects: scheme.projects,
+                        totalCost: scheme.totalCost,
+                        spent: scheme.spent,
+                        completed: scheme.completed,
+                        inProgress: scheme.inProgress,
+                        stuck: scheme.stuck,
+                        planned: scheme.planned,
+                    });
+                }
+            })
+        );
+    }
+
+    /** Fuzzy-match a raw scheme name against a dept's SchemeCard list.
+     *  Handles abbreviations like "BGBO(25-26)" → "Bikashita Gaon Bikashita Odisha (BGBO)" */
+    private findSchemeCard(schemes: { name: string }[], rawName: string): { name: string } | undefined {
+        if (!rawName) return undefined;
+        const norm = (s: string) => s.toLowerCase().replace(/[\s\-_\/\.]+/g, ' ').trim();
+        const n = norm(rawName);
+        for (const s of schemes) {
+            const sn = norm(s.name);
+            if (sn === n || sn.includes(n)) return s;
+            const ac = s.name.match(/\(([A-Z][A-Z0-9]+)\)/);
+            if (ac) {
+                const a = ac[1].toLowerCase();
+                if (n === a || n.startsWith(a + ' ') || n.startsWith(a + '-') || n.startsWith(a + '(')) return s;
+            }
+            const fw = sn.split(' ')[0];
+            if (fw.length >= 4 && n.startsWith(fw)) return s;
+        }
+        return undefined;
+    }
+
+    /** Overlay Firestore projects into their matching scheme cards. */
+    private mergeFirestoreProjects(fsProjects: Project[]): void {
+        this.captureBaselines();
+
+        // Build lookup: DepartmentEntry.shortName → DepartmentEntry
+        const deptByShort = new Map(this.departments.map(d => [d.shortName, d]));
+
+        // Strip previously-injected Firestore entries from every scheme
+        this.departments.forEach(dept =>
+            dept.schemes.forEach(scheme => {
+                if (scheme.projectList) {
+                    scheme.projectList = scheme.projectList.filter(p => !p.id);
+                }
+            })
+        );
+
+        // Inject fresh Firestore projects into matching scheme cards
+        fsProjects.forEach(proj => {
+            if (!proj.scheme || !proj.dept) return;
+            const shortName = this.deptAbbrToShortName[proj.dept] ?? proj.dept;
+            const dept = deptByShort.get(shortName);
+            if (!dept) return;
+            // Fuzzy scheme match — handles raw GP names like "BGBO(25-26)" and already-canonicalised names
+            const scheme = this.findSchemeCard(dept.schemes, proj.scheme) as (typeof dept.schemes)[0] | undefined;
+            if (!scheme) return;
+
+            if (!scheme.projectList) scheme.projectList = [];
+            scheme.projectList.push({
+                id: proj.id,
+                slNo: 0,        // renumbered below
+                district: 'Bhadrak',
+                division: (proj as Project & { division?: string }).division ?? proj.loc ?? '',
+                constituency: proj.loc ?? 'Dhamnagar',
+                roadName: proj.name,
+                lengthKm: (proj as Project & { roadLength?: number }).roadLength,
+                costLakh: proj.cost ?? 0,
+                spentLakh: proj.spent ?? 0,
+                status: proj.status as SchemeProject['status'],
+            });
+        });
+
+        // Renumber slNos and recompute stats = baseline + Firestore delta
+        this.departments.forEach(dept =>
+            dept.schemes.forEach(scheme => {
+                const list = scheme.projectList ?? [];
+                list.forEach((p, i) => p.slNo = i + 1);
+
+                const fsEntries = list.filter(p => p.id);
+                if (fsEntries.length > 0) {
+                    const key = `${dept.name}::${scheme.name}`;
+                    const base = this.baselineStats.get(key)!;
+                    const fsCostCr = fsEntries.reduce((s, p) => s + p.costLakh, 0) / 100;
+                    const fsSpentCr = fsEntries.reduce((s, p) => s + (p.spentLakh ?? 0), 0) / 100;
+                    scheme.projects   = base.projects   + fsEntries.length;
+                    scheme.totalCost  = base.totalCost  + fsCostCr;
+                    scheme.spent      = base.spent      + fsSpentCr;
+                    scheme.completed  = base.completed  + fsEntries.filter(p => p.status === 'Completed').length;
+                    scheme.inProgress = base.inProgress + fsEntries.filter(p => p.status === 'In Progress').length;
+                    scheme.stuck      = base.stuck      + fsEntries.filter(p => p.status === 'Stuck').length;
+                    scheme.planned    = base.planned    + fsEntries.filter(p => p.status === 'Planned').length;
+                }
+            })
+        );
+
+        // Refresh component references so Angular detects the change
+        if (this.selectedDept) {
+            this.selectedDept = this.departments.find(d => d.name === this.selectedDept!.name) ?? this.selectedDept;
+        }
+        if (this.drawerScheme && this.drawerDept) {
+            const freshDept = this.departments.find(d => d.name === this.drawerDept!.name);
+            this.drawerScheme = freshDept?.schemes.find(s => s.name === this.drawerScheme!.name) ?? this.drawerScheme;
+        }
     }
 
     selectDepartment(dept: DepartmentEntry): void {

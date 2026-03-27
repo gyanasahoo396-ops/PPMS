@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { FirestoreProjectService } from '../../services/firestore-project.service';
 import { ProjectDataService } from '../../services/project-data.service';
 import { Project } from '../../models/project.model';
 import { MobilePageHeaderComponent } from '../../components/mobile-page-header/mobile-page-header.component';
 
-type FilterType = 'hm' | 'high-visibility' | 'delayed' | 'low-progress';
+type FilterType = 'hm' | 'high-visibility' | 'delayed' | 'low-progress' | 'recurring';
 
 interface FilterConfig {
     key: FilterType;
@@ -24,10 +26,12 @@ interface FilterConfig {
     templateUrl: './intervention-projects.component.html',
     styleUrls: ['./intervention-projects.component.css']
 })
-export class InterventionProjectsComponent implements OnInit {
+export class InterventionProjectsComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
-    private projectService = inject(ProjectDataService);
+    private firestoreService = inject(FirestoreProjectService);
+    private projectDataService = inject(ProjectDataService);
+    private destroy$ = new Subject<void>();
 
     readonly filters: FilterConfig[] = [
         {
@@ -69,22 +73,38 @@ export class InterventionProjectsComponent implements OnInit {
             headerBg: 'bg-green-700',
             headerText: 'text-white',
             description: 'Projects with physical progress below 50%'
+        },
+        {
+            key: 'recurring',
+            label: 'Recurring Intervention',
+            icon: 'fa-solid fa-rotate',
+            badgeBg: 'bg-purple-50 border-purple-300',
+            badgeText: 'text-purple-700',
+            headerBg: 'bg-purple-700',
+            headerText: 'text-white',
+            description: 'Projects that require recurring follow-up or intervention'
         }
     ];
 
     activeFilter = signal<FilterType>('hm');
 
+    // Start with static legacy data; Firestore will merge in on ngOnInit
+    private readonly staticProjects = this.projectDataService.getAllProjects();
+    private allProjects = signal<Project[]>(this.staticProjects);
+
     projects = computed<Project[]>(() => {
-        const all = this.projectService.getAllProjects();
+        const all = this.allProjects();
         switch (this.activeFilter()) {
             case 'hm':
-                return all.filter(p => p.visibility === 'HM Committed');
+                return all.filter(p => p.visibility === 'HM Committed' || !!p.hmPriority);
             case 'high-visibility':
-                return all.filter(p => p.visibility === 'High Visibility' || p.visibility === 'HM Committed');
+                return all.filter(p => p.visibility === 'High Visibility' || p.visibility === 'HM Committed' || !!p.hmPriority);
             case 'delayed':
                 return all.filter(p => p.status === 'Stuck');
             case 'low-progress':
-                return all.filter(p => p.physical < 50);
+                return all.filter(p => (p.physical ?? 0) < 50);
+            case 'recurring':
+                return all.filter(p => !!p.recurringIntervention);
             default:
                 return [];
         }
@@ -95,12 +115,33 @@ export class InterventionProjectsComponent implements OnInit {
     );
 
     ngOnInit(): void {
-        this.route.queryParamMap.subscribe(params => {
-            const f = params.get('filter') as FilterType | null;
-            if (f && this.filters.some(x => x.key === f)) {
-                this.activeFilter.set(f);
-            }
-        });
+        // Merge Firestore projects into allProjects on every stream emission
+        this.firestoreService.getProjects$()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: fsProjects => {
+                    const fsIds = new Set(fsProjects.map(p => p.id));
+                    this.allProjects.set([
+                        ...this.staticProjects.filter(p => !fsIds.has(p.id)),
+                        ...fsProjects,
+                    ]);
+                },
+                error: err => console.warn('InterventionProjects: Firestore error', err)
+            });
+
+        this.route.queryParamMap
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(params => {
+                const f = params.get('filter') as FilterType | null;
+                if (f && this.filters.some(x => x.key === f)) {
+                    this.activeFilter.set(f);
+                }
+            });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     setFilter(key: FilterType): void {
