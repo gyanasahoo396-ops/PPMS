@@ -362,6 +362,39 @@
           </div>
         </div>
 
+        <!-- HM Priority + Recurring flags -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- HM Priority -->
+          <label class="flex items-center gap-2 cursor-pointer rounded-lg border px-3 py-2.5 hover:bg-slate-50 transition"
+                 [class.border-blue-400]="hmPriorityFlag"
+                 [class.bg-blue-50]="hmPriorityFlag"
+                 [class.border-slate-200]="!hmPriorityFlag">
+            <input type="checkbox" formControlName="hmPriority" class="w-4 h-4 accent-blue-600"
+                   (change)="hmPriorityFlag = addProjectForm.get('hmPriority')!.value" />
+            <div>
+              <p class="text-xs font-semibold text-slate-700 leading-tight">
+                <i class="fa-solid fa-crown text-blue-500 mr-0.5"></i> HM Priority
+              </p>
+              <p class="text-[10px] text-slate-400 leading-tight">Moves to HM Priorities page</p>
+            </div>
+          </label>
+
+          <!-- Recurring Intervention -->
+          <label class="flex items-center gap-2 cursor-pointer rounded-lg border px-3 py-2.5 hover:bg-slate-50 transition"
+                 [class.border-orange-400]="recurringFlag"
+                 [class.bg-orange-50]="recurringFlag"
+                 [class.border-slate-200]="!recurringFlag">
+            <input type="checkbox" formControlName="recurringIntervention" class="w-4 h-4 accent-orange-500"
+                   (change)="recurringFlag = addProjectForm.get('recurringIntervention')!.value" />
+            <div>
+              <p class="text-xs font-semibold text-slate-700 leading-tight">
+                <i class="fa-solid fa-rotate text-orange-500 mr-0.5"></i> Recurring
+              </p>
+              <p class="text-[10px] text-slate-400 leading-tight">Moves to Recurring page</p>
+            </div>
+          </label>
+        </div>
+
         <!-- Actions -->
         <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-200">
           <button type="button" (click)="closeAddProjectForm()"

@@ -40,6 +40,10 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
     // Delete confirmation
     deletingSlNo: number | null = null;
 
+    // Checkbox flag state (for template styling without OnPush)
+    hmPriorityFlag = false;
+    recurringFlag = false;
+
     // Firestore sync state
     usingFirestore = false;
     firestoreIds = new Map<string, string>(); // dept name → Firestore document ID
@@ -348,7 +352,11 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
             costLakh:     [null, [Validators.required, Validators.min(0.01)]],
             spentLakh:    [null, [Validators.min(0)]],
             status:       ['Planned', Validators.required],
+            hmPriority:           [false],
+            recurringIntervention:[false],
         });
+        this.hmPriorityFlag = false;
+        this.recurringFlag = false;
         this.showAddForm = true;
     }
 
@@ -366,7 +374,11 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
             costLakh:     [proj.costLakh, [Validators.required, Validators.min(0.01)]],
             spentLakh:    [proj.spentLakh ?? null, [Validators.min(0)]],
             status:       [proj.status ?? 'Planned', Validators.required],
+            hmPriority:           [proj.hmPriority ?? false],
+            recurringIntervention:[proj.recurringIntervention ?? false],
         });
+        this.hmPriorityFlag = proj.hmPriority ?? false;
+        this.recurringFlag = proj.recurringIntervention ?? false;
         this.showAddForm = true;
     }
 
@@ -386,6 +398,15 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
     }
 
     confirmDeleteProject(slNo: number): void {
+        // If this project was stored in the main Firestore projects collection (has an id),
+        // delete it there too — otherwise it will be re-injected by mergeFirestoreProjects on
+        // the next stream emission.
+        const fsId = this.drawerScheme?.projectList?.find(p => p.slNo === slNo)?.id;
+        if (fsId) {
+            this.firestoreProjectService.deleteProject(fsId)
+                .catch(err => console.error('Failed to delete project from Firestore projects:', err));
+        }
+
         this.deptService.deleteProjectFromScheme(
             this.drawerDept!.name,
             this.drawerScheme!.name,
@@ -407,12 +428,14 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
         this.syncDeptToFirestore();
     }
 
-    submitAddProject(): void {
+    async submitAddProject(): Promise<void> {
         if (this.addProjectForm.invalid) {
             this.addProjectForm.markAllAsTouched();
             return;
         }
         const v = this.addProjectForm.value;
+        const hmPriority: boolean = v.hmPriority ?? false;
+        const recurringIntervention: boolean = v.recurringIntervention ?? false;
         const data: Omit<SchemeProject, 'slNo'> = {
             district:     v.district,
             division:     v.division,
@@ -422,7 +445,33 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
             spentLakh:    v.spentLakh != null ? Number(v.spentLakh) : undefined,
             lengthKm:     (this.drawerHasLength && v.lengthKm != null) ? Number(v.lengthKm) : undefined,
             status:       v.status,
+            hmPriority,
+            recurringIntervention,
         };
+
+        // When either flag is set, also persist a Project record in the main projects
+        // collection so it surfaces on the HM Priorities and Intervention pages.
+        if (hmPriority || recurringIntervention) {
+            const today = new Date().toISOString().split('T')[0];
+            const fiscalYearEnd = today < `${new Date().getFullYear()}-04-01` ? `${new Date().getFullYear()}-03-31` : `${new Date().getFullYear() + 1}-03-31`;
+            await this.firestoreProjectService.createProject({
+                name:                 v.roadName,
+                dept:                 this.drawerDept!.shortName,
+                loc:                  v.constituency,
+                cost:                 Number(v.costLakh),
+                spent:                v.spentLakh != null ? Number(v.spentLakh) : 0,
+                physical:             0,
+                status:               v.status,
+                start:                today,
+                end:                  fiscalYearEnd,
+                priority:             false,
+                hmPriority,
+                recurringIntervention,
+                remarks:              '',
+                scheme:               this.drawerScheme!.name,
+            }).catch(err => console.error('Failed to save project to Firestore projects:', err));
+        }
+
         if (this.formMode === 'edit' && this.editingSlNo != null) {
             this.deptService.updateProjectInScheme(this.drawerDept!.name, this.drawerScheme!.name, this.editingSlNo, { ...data, slNo: Number(v.slNo) });
             this.drawerScheme = this.drawerDept!.schemes.find(s => s.name === this.drawerScheme!.name) ?? this.drawerScheme;

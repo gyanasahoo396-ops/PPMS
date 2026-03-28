@@ -12,6 +12,8 @@ export interface SchemeProject {
   costLakh: number;
   spentLakh?: number;
   status?: 'Completed' | 'In Progress' | 'Stuck' | 'Planned';
+  hmPriority?: boolean;           // HM Priority — project shown on HM Priorities page
+  recurringIntervention?: boolean; // Recurring — project shown on Intervention recurring tab
 }
 
 // ---------- Scheme card (summary) ----------
