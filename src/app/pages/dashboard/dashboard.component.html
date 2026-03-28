@@ -82,21 +82,28 @@
             <table class="w-full table-fixed border-collapse text-sm">
                 <thead>
                     <tr class="bg-slate-600 text-white">
-                        <th class="w-[45%] px-2 sm:px-4 py-3 text-left font-bold border-b">Dept</th>
+                        <th class="w-[46%] px-2 sm:px-4 py-3 text-left font-bold border-b">Dept</th>
                         <th class="w-[18%] px-2 sm:px-4 py-3 text-center font-bold border-b">Total</th>
                         <th class="w-[18%] px-2 sm:px-4 py-3 text-center font-bold border-b">Track</th>
-                        <th class="w-[19%] px-2 sm:px-4 py-3 text-center font-bold border-b">Crit.</th>
+                        <th class="w-[18%] px-2 sm:px-4 py-3 text-center font-bold border-b">Crit.</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @for (dept of departmentBreakdown(); track dept.dept; let last = $last) {
-                    <tr class="border-b hover:bg-slate-50" [class.border-b-2]="last">
-                        <td class="max-w-0 px-2 sm:px-4 py-3 font-bold text-xs sm:text-sm cursor-pointer text-blue-600 hover:text-blue-800 hover:underline truncate" (click)="navigateToDepartment(dept.dept)">{{ dept.dept }}</td>
-                        <td class="px-2 sm:px-4 py-3 text-center font-bold text-slate-700 text-xs">{{ dept.total }}</td>
-                        <td class="px-2 sm:px-4 py-3 text-center">
+                    @for (dept of allDeptRows(); track dept.dept) {
+                    <tr class="border-b last:border-b-0 hover:bg-slate-50">
+                        <td class="max-w-0 px-2 sm:px-4 py-2.5 cursor-pointer hover:text-indigo-700 truncate" (click)="navigateToDepartment(dept.dept)">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="flex-shrink-0 w-6 h-6 rounded flex items-center justify-center text-white text-[10px]" [class]="getDeptBgClass(dept.color)">
+                                    <i [class]="dept.icon"></i>
+                                </span>
+                                <span class="font-semibold text-xs truncate text-blue-600 group-hover:text-indigo-700">{{ dept.name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-2 sm:px-4 py-2.5 text-center font-bold text-slate-700 text-xs">{{ dept.total }}</td>
+                        <td class="px-2 sm:px-4 py-2.5 text-center">
                             <span class="inline-flex items-center justify-center w-7 h-5 rounded text-white bg-green-600 font-semibold text-xs">{{ dept.onTrack }}</span>
                         </td>
-                        <td class="px-2 sm:px-4 py-3 text-center">
+                        <td class="px-2 sm:px-4 py-2.5 text-center">
                             <span class="inline-flex items-center justify-center w-7 h-5 rounded text-white bg-red-600 font-semibold text-xs">{{ dept.critical }}</span>
                         </td>
                     </tr>
@@ -106,6 +113,39 @@
         </div>
 
     </div>
+
+    <!-- Admin: Cleanup bad-import unknown departments -->
+    @if (isAdmin() && unknownDeptGroups().length > 0) {
+    <div class="bg-white rounded-lg shadow border border-red-200">
+        <div class="px-4 sm:px-6 py-3 bg-red-50 border-b border-red-200 flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
+            <span class="font-bold text-red-700 text-sm">Unknown Departments (Bad Import Data)</span>
+            <span class="text-xs text-red-500 ml-1">These departments were not recognized — likely from a wrong Excel import.</span>
+        </div>
+        <div class="px-4 sm:px-6 py-4 space-y-2">
+            @for (group of unknownDeptGroups(); track group.dept) {
+            <div class="flex items-center justify-between gap-3 p-3 rounded-lg bg-red-50 border border-red-100">
+                <div>
+                    <span class="font-semibold text-slate-800 text-sm">"{{ group.dept }}"</span>
+                    <span class="text-xs text-slate-500 ml-2">{{ group.count }} project{{ group.count === 1 ? '' : 's' }}</span>
+                </div>
+                <button (click)="deleteDeptProjects(group.dept, group.ids)"
+                    [disabled]="isDeletingDept() !== null"
+                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+                    @if (isDeletingDept() === group.dept) {
+                        <i class="fa-solid fa-spinner animate-spin"></i> Deleting…
+                    } @else {
+                        <i class="fa-solid fa-trash"></i> Delete All
+                    }
+                </button>
+            </div>
+            }
+            @if (deleteDeptError()) {
+                <p class="text-xs text-red-600 mt-1">{{ deleteDeptError() }}</p>
+            }
+        </div>
+    </div>
+    }
 
     <!-- Projects Requiring Intervention -->
     <div class="bg-white rounded-lg shadow">
@@ -598,11 +638,33 @@
             </div>
             }
 
-            <!-- Success banner -->
+            <!-- Success banner replaced by summary -->
             @if (importDone()) {
-            <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 text-sm text-emerald-700 font-semibold">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                {{ importProgress()?.total }} project(s) imported successfully! Closing…
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 overflow-hidden">
+                <div class="px-4 py-3 bg-emerald-600 text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span class="font-bold text-sm">{{ importProgress()?.total }} project(s) imported successfully!</span>
+                </div>
+                <div class="p-4 space-y-3 max-h-64 overflow-y-auto">
+                    @for (group of importSummary(); track group.dept) {
+                    <div>
+                        <p class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            <i class="fa-solid fa-building-columns text-emerald-600 mr-1"></i>{{ group.dept }}
+                            <span class="font-normal text-slate-400 normal-case tracking-normal ml-1">
+                                ({{ group.schemes.reduce(sumCount, 0) }} projects)
+                            </span>
+                        </p>
+                        <div class="space-y-1 pl-3">
+                            @for (s of group.schemes; track s.name) {
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-slate-600 truncate max-w-xs">{{ s.name }}</span>
+                                <span class="font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full ml-2 whitespace-nowrap">{{ s.count }} project{{ s.count !== 1 ? 's' : '' }}</span>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+                </div>
             </div>
             }
 
@@ -619,27 +681,34 @@
         <!-- Import footer -->
         <div class="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 flex-shrink-0">
             <p class="text-xs text-slate-400">
-                @if (excelRows().length > 0) {
-                    <span><strong class="text-emerald-700">{{ excelValidCount() }}</strong> of {{ excelRows().length }} rows will be imported</span>
+                @if (importDone()) {
+                    <span class="text-emerald-600 font-semibold">Import complete. Review the summary above.</span>
+                } @else if (excelRows().length > 0) {
+                    <span>
+                        <strong class="text-emerald-700">{{ excelValidCount() }}</strong> of {{ excelRows().length }} rows valid.
+                        <span class="text-slate-500 ml-1">Required: name · scheme · village · estimate cost &gt; 0</span>
+                    </span>
+                } @else {
+                    <span>Required fields: <strong>Name of Project, Name of Scheme, Village/Location, Estimate Cost</strong></span>
                 }
             </p>
             <div class="flex gap-3">
                 <button (click)="closeNewProjectModal()"
                         class="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 transition">
-                    Cancel
+                    @if (importDone()) { Close } @else { Cancel }
                 </button>
+                @if (!importDone()) {
                 <button (click)="importExcelProjects()"
-                        [disabled]="excelValidCount() === 0 || isImporting() || importDone()"
+                        [disabled]="excelValidCount() === 0 || isImporting()"
                         class="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
                     @if (isImporting()) {
                         <i class="fa-solid fa-spinner animate-spin"></i> Importing…
-                    } @else if (importDone()) {
-                        <i class="fa-solid fa-circle-check"></i> Done!
                     } @else {
                         <i class="fa-solid fa-file-import"></i>
                         Import {{ excelValidCount() > 0 ? excelValidCount() : '' }} Project{{ excelValidCount() !== 1 ? 's' : '' }}
                     }
                 </button>
+                }
             </div>
         </div>
         } <!-- end import tab -->

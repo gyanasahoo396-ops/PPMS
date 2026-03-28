@@ -62,6 +62,24 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     rdSchemeData = signal<RDSchemeData[]>([]);
     departmentBreakdown = signal<any[]>([]);
 
+    // Always shows all 13 departments; merges live Firestore counts where available
+    allDeptRows = computed(() => {
+        const liveMap = new Map(this.departmentBreakdown().map((d: any) => [d.dept, d]));
+        return this.deptEntries.map(d => {
+            const live = liveMap.get(d.shortName);
+            const staticTotal = d.schemes.reduce((s, sc) => s + sc.projects, 0);
+            return {
+                dept: d.shortName,
+                name: d.name,
+                icon: d.icon,
+                color: d.color,
+                total:   live?.total   ?? staticTotal,
+                onTrack: live?.onTrack ?? 0,
+                critical: live?.critical ?? 0,
+            };
+        });
+    });
+
     // Create-project modal state
     showNewProjectModal = signal(false);
     isSaving = signal(false);
@@ -72,6 +90,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     seedError  = signal<string | null>(null);
     seedDone   = signal(false);
 
+    // Cleanup: unknown (bad-import) departments
+    isDeletingDept = signal<string | null>(null);
+    deleteDeptError = signal<string | null>(null);
+    unknownDeptGroups = computed(() => {
+        const validDepts = new Set(this.departments);
+        const groups = new Map<string, Project[]>();
+        for (const p of this.allProjects()) {
+            if (!p.dept || validDepts.has(p.dept)) continue;
+            if (!groups.has(p.dept)) groups.set(p.dept, []);
+            groups.get(p.dept)!.push(p);
+        }
+        return Array.from(groups.entries()).map(([dept, projects]) => ({ dept, count: projects.length, ids: projects.map(p => p.id) }));
+    });
+
     // Excel import state
     activeModalTab = signal<'manual' | 'import'>('manual');
     excelRows = signal<ExcelImportRow[]>([]);
@@ -80,6 +112,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     importProgress = signal<{ done: number; total: number } | null>(null);
     importDone = signal(false);
     isDragOver = signal(false);
+    importSummary = signal<{ dept: string; schemes: { name: string; count: number }[] }[]>([]);
     excelValidCount = computed(() => this.excelRows().filter(r => r._valid).length);
 
     // Scheme dropdown state
@@ -112,7 +145,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     newProjectForm!: FormGroup;
 
     private deptSchemesService = inject(DepartmentSchemesService);
-    private readonly deptEntries = this.deptSchemesService.getDepartments();
+    readonly deptEntries = this.deptSchemesService.getDepartments();
     readonly departments = this.deptEntries.map(d => d.shortName);
     readonly statusOptions = ['Planned', 'In Progress', 'Completed', 'Stuck'];
     readonly schemesByDept: Record<string, string[]> = Object.fromEntries(
@@ -231,6 +264,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.excelRows.set([]);
         this.importProgress.set(null);
         this.importDone.set(false);
+        this.importSummary.set([]);
     }
 
     async createProject(): Promise<void> {
@@ -525,10 +559,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             row['name_of_the_executant'] ?? row['executant'] ?? row['contractor'] ?? ''
         ).trim();
 
-        // Validation — only name and cost are strictly required; other fields have sensible defaults
+        // Validation — ALL four fields are mandatory for import
         const errors: string[] = [];
-        if (!name || name.length < 3) errors.push('Project name required (min 3 chars)');
-        if (isNaN(cost) || cost < 0)  errors.push('Cost must be ≥ 0');
+        if (!name || name.length < 3)   errors.push('Project name required (min 3 chars)');
+        if (!scheme)                     errors.push('Name of scheme is required');
+        if (!loc)                        errors.push('Village / location is required');
+        if (isNaN(cost) || cost <= 0)    errors.push('Estimate cost must be > 0');
         if (!['Planned', 'In Progress', 'Completed', 'Stuck'].includes(status)) {
             errors.push(`Unknown status "${rawStatus}"`);
         }
@@ -543,6 +579,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     removeExcelRow(index: number): void {
         this.excelRows.update(rows => rows.filter((_, i) => i !== index));
     }
+
+    /** Used in template to sum scheme counts in import summary */
+    readonly sumCount = (acc: number, s: { count: number }) => acc + s.count;
 
     async importExcelProjects(): Promise<void> {
         const valid = this.excelRows().filter(r => r._valid);
@@ -571,8 +610,23 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                 done++;
                 this.importProgress.set({ done, total: valid.length });
             }
+            // Build summary grouped by dept → scheme
+            const deptMap = new Map<string, Map<string, number>>();
+            for (const row of valid) {
+                const dept = row.dept || 'Unknown';
+                const scheme = row.scheme || 'No Scheme';
+                if (!deptMap.has(dept)) deptMap.set(dept, new Map());
+                const schMap = deptMap.get(dept)!;
+                schMap.set(scheme, (schMap.get(scheme) ?? 0) + 1);
+            }
+            this.importSummary.set(
+                Array.from(deptMap.entries()).map(([dept, schMap]) => ({
+                    dept,
+                    schemes: Array.from(schMap.entries()).map(([name, count]) => ({ name, count }))
+                }))
+            );
             this.importDone.set(true);
-            setTimeout(() => this.closeNewProjectModal(), 1800);
+            // No auto-close — user reads the summary and clicks Done
         } catch (err: unknown) {
             const code = (err as { code?: string })?.code;
             if (code === 'permission-denied') {
@@ -638,6 +692,31 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     navigateToDepartment(deptName: string): void {
         this.router.navigate(['/dhamnagar-dashboard/departments'], { queryParams: { dept: deptName } });
+    }
+
+    getDeptBgClass(color: string): string {
+        const map: Record<string, string> = {
+            red:    'bg-red-500',
+            blue:   'bg-blue-500',
+            purple: 'bg-purple-500',
+            amber:  'bg-amber-500',
+            cyan:   'bg-cyan-500',
+            violet: 'bg-violet-500',
+            green:  'bg-green-600',
+            orange: 'bg-orange-500',
+            teal:   'bg-teal-500',
+            pink:   'bg-pink-500',
+            indigo: 'bg-indigo-500',
+            yellow: 'bg-yellow-500',
+        };
+        return map[color] ?? 'bg-slate-500';
+    }
+
+    getDeptLiveTotal(shortName: string): number {
+        return this.departmentBreakdown().find(d => d.dept === shortName)?.total
+            ?? this.deptEntries.find(d => d.shortName === shortName)?.schemes
+                .reduce((s, sc) => s + sc.projects, 0)
+            ?? 0;
     }
 
     openProjectDetails(projectId: string): void {
@@ -710,6 +789,22 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                     cutout: '70%'
                 }
             });
+        }
+    }
+
+    // ── Cleanup: delete all projects for an unknown/bad-import department ─
+    async deleteDeptProjects(dept: string, ids: string[]): Promise<void> {
+        if (!ids.length) return;
+        this.isDeletingDept.set(dept);
+        this.deleteDeptError.set(null);
+        try {
+            for (const id of ids) {
+                await this.firestoreService.deleteProject(id);
+            }
+        } catch (err: unknown) {
+            this.deleteDeptError.set(`Failed to delete: ${(err as Error)?.message ?? 'Unknown error'}`);
+        } finally {
+            this.isDeletingDept.set(null);
         }
     }
 

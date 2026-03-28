@@ -287,6 +287,15 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
         this.drawerOpen   = true;
     }
 
+    /** Open drawer AND immediately show the Add Project form */
+    openSchemeDrawerWithAdd(scheme: SchemeCard, event: Event): void {
+        event.stopPropagation();
+        this.drawerScheme = scheme;
+        this.drawerDept   = this.selectedDept;
+        this.drawerOpen   = true;
+        this.openAddProjectForm();
+    }
+
     closeDrawer(): void {
         this.drawerOpen = false;
         setTimeout(() => { this.drawerScheme = null; this.drawerDept = null; }, 300);
@@ -425,15 +434,9 @@ export class DepartmentsComponent implements OnInit, OnDestroy {
             this.deptService.addProjectToScheme(this.drawerDept!.name, this.drawerScheme!.name, data, Number(v.slNo));
             this.drawerScheme = this.drawerDept!.schemes.find(s => s.name === this.drawerScheme!.name) ?? this.drawerScheme;
             this.syncDeptToFirestore();
-            // Auto-open edit form for the newly added project so the user can refine it
-            const newProj = this.drawerScheme!.projectList?.at(-1);
-            if (newProj) {
-                this.openEditProjectForm(newProj);
-            } else {
-                this.showAddForm = false;
-                this.formMode = 'add';
-                this.editingSlNo = null;
-            }
+            this.showAddForm = false;
+            this.formMode = 'add';
+            this.editingSlNo = null;
         }
     }
 
