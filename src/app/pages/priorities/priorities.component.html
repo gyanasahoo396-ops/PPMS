@@ -10,9 +10,13 @@
         </p>
     </div>
 
+    @if (priorityProjects().length === 0) {
+        <p class="text-sm text-slate-400 text-center py-8">No HM priority projects at this time.</p>
+    }
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div *ngFor="let project of priorityProjects"
-            class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 hover:shadow-md hover:scale-[1.01] transform transition-all duration-300">
+        @for (project of priorityProjects(); track project.id) {
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 hover:shadow-md hover:scale-[1.01] transform transition-all duration-300">
             <div class="h-32 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center relative">
                 <i class="fa-solid fa-star text-5xl text-indigo-200"></i>
                 <div class="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
@@ -42,6 +46,7 @@
                 </button>
             </div>
         </div>
+        }
     </div>
 </div>
 </div>

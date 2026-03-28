@@ -28,7 +28,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.firestoreService.getStuckProjects$()
             .pipe(takeUntil(this.destroy$))
-            .subscribe(stuck => this.stuckCount.set(stuck.length));
+            .subscribe({
+                next: stuck => this.stuckCount.set(stuck.length),
+                error: err => console.warn('Stuck projects stream error:', err)
+            });
     }
 
     ngOnDestroy(): void {

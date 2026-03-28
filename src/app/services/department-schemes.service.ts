@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 
 // ---------- Individual road / scheme project ----------
 export interface SchemeProject {
+  id?: string;          // Firestore project ID — present only for live Firestore projects
   slNo: number;
   district: string;
   division: string;

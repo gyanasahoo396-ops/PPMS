@@ -11,19 +11,36 @@
         <div class="flex items-center gap-2 ml-auto">
             <!-- Admin: seed static data to Firestore -->
             @if (isAdmin()) {
-                <button (click)="seedStaticDataToFirestore()" [disabled]="isSeeding()"
-                    class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    @if (isSeeding()) {
-                        <i class="fa-solid fa-spinner animate-spin"></i> Seeding…
-                    } @else {
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Seed to Firestore
+                <div class="flex flex-col items-end gap-1">
+                    <button (click)="seedStaticDataToFirestore()" [disabled]="isSeeding()"
+                        class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        @if (isSeeding()) {
+                            <i class="fa-solid fa-spinner animate-spin"></i> Seeding…
+                        } @else if (seedDone()) {
+                            <i class="fa-solid fa-check text-emerald-600"></i> <span class="text-emerald-600">Seeded!</span>
+                        } @else {
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Seed to Firestore
+                        }
+                    </button>
+                    @if (seedError()) {
+                        <p class="text-xs text-red-600 max-w-xs text-right">{{ seedError() }}</p>
                     }
-                </button>
+                </div>
             }
             <!-- Add new project -->
-            <button (click)="openNewProjectModal()"
+            <button (click)="openNewProjectModal('manual')"
                 class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition">
                 <i class="fa-solid fa-plus"></i> Add Project
+            </button>
+            <!-- Import from Excel -->
+            <button (click)="openNewProjectModal('import')"
+                class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition">
+                <i class="fa-solid fa-file-excel"></i> Import Excel
+            </button>
+            <!-- Export all projects to multi-sheet Excel -->
+            <button (click)="downloadAllProjects()" [disabled]="!allProjects().length"
+                class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-file-arrow-down"></i> Export Excel
             </button>
         </div>
     </div>
@@ -126,6 +143,9 @@
         <a routerLink="/dhamnagar-dashboard/intervention" [queryParams]="{filter: 'low-progress'}" class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-green-50 text-green-700 border border-green-300 font-medium text-xs sm:text-sm hover:bg-green-100 transition">
             <i class="fa-solid fa-chart-line"></i> Low Progress &lt; 50%
         </a>
+        <a routerLink="/dhamnagar-dashboard/intervention" [queryParams]="{filter: 'recurring'}" class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-purple-50 text-purple-700 border border-purple-300 font-medium text-xs sm:text-sm hover:bg-purple-100 transition">
+            <i class="fa-solid fa-rotate"></i> Recurring Intervention
+        </a>
     </div>
 
     <!-- Charts Section -->
@@ -162,23 +182,50 @@
 @if (showNewProjectModal()) {
 <div class="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 pt-12 backdrop-blur-sm"
      (click)="closeNewProjectModal()">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-hidden flex flex-col transition-all"
+         [class.max-w-2xl]="activeModalTab() === 'manual'"
+         [class.max-w-5xl]="activeModalTab() === 'import'"
          (click)="$event.stopPropagation()"
          role="dialog" aria-modal="true" aria-labelledby="create-proj-title">
 
         <!-- Modal header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-blue-50 flex-shrink-0">
             <div>
-                <h2 id="create-proj-title" class="text-lg font-bold text-slate-900">Create New Project</h2>
+                <h2 id="create-proj-title" class="text-lg font-bold text-slate-900">
+                    @if (activeModalTab() === 'manual') { Create New Project }
+                    @else { Import Projects from Excel }
+                </h2>
                 <p class="text-xs text-slate-500 mt-0.5">Saved directly to Firestore</p>
             </div>
-            <button (click)="closeNewProjectModal()" aria-label="Close"
-                    class="text-slate-400 hover:text-slate-600 w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white transition">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
+            <div class="flex items-center gap-3">
+                <!-- Tab switcher -->
+                <div class="flex bg-slate-100 rounded-lg p-0.5 text-xs font-semibold">
+                    <button (click)="activeModalTab.set('manual')"
+                            class="px-3 py-1.5 rounded-md transition"
+                            [class.bg-white]="activeModalTab() === 'manual'"
+                            [class.text-indigo-700]="activeModalTab() === 'manual'"
+                            [class.shadow-sm]="activeModalTab() === 'manual'"
+                            [class.text-slate-500]="activeModalTab() !== 'manual'">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i> Manual
+                    </button>
+                    <button (click)="activeModalTab.set('import')"
+                            class="px-3 py-1.5 rounded-md transition"
+                            [class.bg-white]="activeModalTab() === 'import'"
+                            [class.text-emerald-700]="activeModalTab() === 'import'"
+                            [class.shadow-sm]="activeModalTab() === 'import'"
+                            [class.text-slate-500]="activeModalTab() !== 'import'">
+                        <i class="fa-solid fa-file-excel mr-1"></i> Excel
+                    </button>
+                </div>
+                <button (click)="closeNewProjectModal()" aria-label="Close"
+                        class="text-slate-400 hover:text-slate-600 w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
         </div>
 
-        <!-- Modal body -->
+        <!-- ==================== MANUAL TAB ==================== -->
+        @if (activeModalTab() === 'manual') {
         <div class="overflow-y-auto p-6">
             <form [formGroup]="newProjectForm" (ngSubmit)="createProject()" novalidate class="space-y-4">
 
@@ -224,29 +271,65 @@
                     </div>
                 </div>
 
-                <!-- Status + Priority -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-status">
-                            Status <span class="text-red-500">*</span>
-                        </label>
-                        <select id="np-status" formControlName="status"
-                                class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                            @for (s of statusOptions; track s) {
-                                <option [value]="s">{{ s }}</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="flex items-end pb-1">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" formControlName="priority" class="w-4 h-4 rounded accent-indigo-600" />
-                            <span class="text-sm font-medium text-slate-700">Mark as Priority</span>
-                        </label>
-                    </div>
+                <!-- Scheme -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-scheme">
+                        Scheme <span class="text-red-500">*</span>
+                    </label>
+                    <select id="np-scheme" formControlName="scheme"
+                            class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            [class.border-red-400]="newProjectForm.get('scheme')?.invalid && newProjectForm.get('scheme')?.touched"
+                            [attr.disabled]="availableSchemes().length === 0 ? true : null">
+                        <option value="">{{ availableSchemes().length === 0 ? 'Select a department first…' : 'Select scheme…' }}</option>
+                        @for (s of availableSchemes(); track s) {
+                            <option [value]="s">{{ s }}</option>
+                        }
+                    </select>
+                    @if (newProjectForm.get('scheme')?.invalid && newProjectForm.get('scheme')?.touched) {
+                        <p class="text-xs text-red-500 mt-1">Required.</p>
+                    }
                 </div>
 
-                <!-- Cost + Spent + Physical -->
-                <div class="grid grid-cols-3 gap-4">
+                <!-- Status -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-status">
+                        Status <span class="text-red-500">*</span>
+                    </label>
+                    <select id="np-status" formControlName="status"
+                            class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        @for (s of statusOptions; track s) {
+                            <option [value]="s">{{ s }}</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Flags row -->
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- HM Priority -->
+                    <label class="flex items-center gap-2 cursor-pointer rounded-lg border border-slate-200 px-3 py-2.5 hover:bg-slate-50 transition"
+                           [class.border-blue-400]="hmPriorityFlag()"
+                           [class.bg-blue-50]="hmPriorityFlag()">
+                        <input type="checkbox" formControlName="hmPriority" class="w-4 h-4 accent-blue-600" />
+                        <div>
+                            <p class="text-xs font-semibold text-slate-700 leading-tight"><i class="fa-solid fa-crown text-blue-500 mr-0.5"></i> HM Priority</p>
+                            <p class="text-[10px] text-slate-400 leading-tight">Minister committed</p>
+                        </div>
+                    </label>
+
+                    <!-- Recurring Intervention -->
+                    <label class="flex items-center gap-2 cursor-pointer rounded-lg border border-slate-200 px-3 py-2.5 hover:bg-slate-50 transition"
+                           [class.border-orange-400]="recurringFlag()"
+                           [class.bg-orange-50]="recurringFlag()">
+                        <input type="checkbox" formControlName="recurringIntervention" class="w-4 h-4 accent-orange-500" />
+                        <div>
+                            <p class="text-xs font-semibold text-slate-700 leading-tight"><i class="fa-solid fa-rotate text-orange-500 mr-0.5"></i> Intervention</p>
+                            <p class="text-[10px] text-slate-400 leading-tight">Recurring issue</p>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Cost + Spent -->
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-cost">
                             Cost (₹ Lakh) <span class="text-red-500">*</span>
@@ -263,14 +346,6 @@
                             Spent (₹ Lakh)
                         </label>
                         <input id="np-spent" type="number" formControlName="spent" min="0" step="0.01"
-                               placeholder="0"
-                               class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1" for="np-physical">
-                            Progress (%)
-                        </label>
-                        <input id="np-physical" type="number" formControlName="physical" min="0" max="100"
                                placeholder="0"
                                class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                     </div>
@@ -317,7 +392,7 @@
             </form>
         </div>
 
-        <!-- Modal footer -->
+        <!-- Manual footer -->
         <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 flex-shrink-0">
             <button (click)="closeNewProjectModal()"
                     class="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 transition">
@@ -332,6 +407,242 @@
                 }
             </button>
         </div>
+        } <!-- end manual tab -->
+
+        <!-- ==================== IMPORT TAB ==================== -->
+        @if (activeModalTab() === 'import') {
+        <div class="overflow-y-auto p-6 space-y-4">
+
+            <!-- Instructions row -->
+            <div class="flex items-start justify-between gap-4 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                <div class="text-xs text-emerald-800 space-y-1.5">
+                    <p class="font-semibold text-sm">Supported Excel formats — any of these column names are recognised automatically:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+                        <div>
+                            <p class="font-semibold text-emerald-700 mb-0.5">GP / Govt format</p>
+                            <p>
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">NAME OF PROJECT</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">ESTMATE COST</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">STATUS</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">Name of Village</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">Name of Scheme</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">Name of the Executant</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">REMARKS</span>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-emerald-700 mb-0.5">Standard format</p>
+                            <p>
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">name</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">dept</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">loc</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">cost</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">status</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">start</span> &bull;
+                                <span class="font-mono bg-white px-1 rounded border border-emerald-200">end</span>
+                            </p>
+                        </div>
+                    </div>
+                    <p class="text-emerald-700">
+                        Title rows above headers are skipped automatically &bull;
+                        Multiple sheets supported (sheet name used as dept) &bull;
+                        Status <code>N/S</code> = Planned &bull;
+                        Dates: <code>YYYY-MM-DD</code> or <code>DD-MM-YYYY</code>
+                    </p>
+                </div>
+                <button (click)="downloadExcelTemplate()"
+                        class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition">
+                    <i class="fa-solid fa-download"></i> Template
+                </button>
+            </div>
+
+            <!-- Drop zone (shown when no file loaded) -->
+            @if (excelRows().length === 0 && !importError()) {
+            <label for="excel-file-input"
+                   class="flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-xl py-12 cursor-pointer transition"
+                   [class.border-emerald-400]="isDragOver()"
+                   [class.bg-emerald-50]="isDragOver()"
+                   [class.border-slate-300]="!isDragOver()"
+                   [class.bg-slate-50]="!isDragOver()"
+                   (dragover)="onDragOver($event)"
+                   (dragleave)="onDragLeave()"
+                   (drop)="onDrop($event)">
+                <i class="fa-solid fa-file-excel text-4xl"
+                   [class.text-emerald-500]="isDragOver()"
+                   [class.text-slate-300]="!isDragOver()"></i>
+                <div class="text-center">
+                    <p class="text-sm font-semibold text-slate-600">Drag &amp; drop your Excel file here</p>
+                    <p class="text-xs text-slate-400 mt-0.5">or click to browse &mdash; .xlsx / .xls supported</p>
+                </div>
+                <input id="excel-file-input" type="file" accept=".xlsx,.xls" class="sr-only"
+                       (change)="onExcelFileInput($event)" aria-label="Upload Excel file" />
+            </label>
+            }
+
+            <!-- Error after drop zone -->
+            @if (importError() && excelRows().length === 0) {
+            <div class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+                <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                <span>{{ importError() }}</span>
+            </div>
+            <label for="excel-file-input-retry"
+                   class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-dashed border-slate-300 text-slate-500 hover:border-emerald-400 hover:text-emerald-600 cursor-pointer transition">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i> Choose a different file
+                <input id="excel-file-input-retry" type="file" accept=".xlsx,.xls" class="sr-only"
+                       (change)="onExcelFileInput($event)" aria-label="Upload Excel file" />
+            </label>
+            }
+
+            <!-- Preview table -->
+            @if (excelRows().length > 0) {
+            <div class="space-y-3">
+                <!-- Stats row -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            <i class="fa-solid fa-circle-check"></i> {{ excelValidCount() }} valid
+                        </span>
+                        @if (excelRows().length - excelValidCount() > 0) {
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                            <i class="fa-solid fa-triangle-exclamation"></i> {{ excelRows().length - excelValidCount() }} invalid
+                        </span>
+                        }
+                        <span class="text-xs text-slate-400">{{ excelRows().length }} total rows</span>
+                    </div>
+                    <label for="excel-file-replace"
+                           class="flex items-center gap-1 text-xs text-slate-500 hover:text-emerald-600 cursor-pointer transition">
+                        <i class="fa-solid fa-repeat"></i> Replace file
+                        <input id="excel-file-replace" type="file" accept=".xlsx,.xls" class="sr-only"
+                               (change)="onExcelFileInput($event)" aria-label="Replace Excel file" />
+                    </label>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-auto rounded-xl border border-slate-200 max-h-72">
+                    <table class="w-full text-xs border-collapse">
+                        <thead class="sticky top-0 bg-slate-700 text-white">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-semibold w-8">#</th>
+                                <th class="px-3 py-2 text-left font-semibold min-w-48">Name</th>
+                                <th class="px-3 py-2 text-left font-semibold">Scheme</th>
+                                <th class="px-3 py-2 text-left font-semibold">Dept</th>
+                                <th class="px-3 py-2 text-left font-semibold">Location</th>
+                                <th class="px-3 py-2 text-right font-semibold">Cost (₹)</th>
+                                <th class="px-3 py-2 text-center font-semibold">%</th>
+                                <th class="px-3 py-2 text-left font-semibold">Status</th>
+                                <th class="px-3 py-2 text-center font-semibold w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (row of excelRows(); track $index) {
+                            <tr [class.bg-red-50]="!row._valid" [class.hover:bg-red-100]="!row._valid"
+                                [class.hover:bg-slate-50]="row._valid"
+                                class="border-b border-slate-100">
+                                <td class="px-3 py-2 text-slate-400 font-mono">{{ $index + 1 }}</td>
+                                <td class="px-3 py-2 font-medium text-slate-800 max-w-48 truncate">
+                                    @if (!row._valid) {
+                                        <span class="inline-flex items-center gap-1">
+                                            <i class="fa-solid fa-circle-exclamation text-red-500 flex-shrink-0"
+                                               [title]="row._errors.join(', ')"></i>
+                                            {{ row.name || '(empty)' }}
+                                        </span>
+                                    } @else {
+                                        {{ row.name }}
+                                    }
+                                </td>
+                                <td class="px-3 py-2 text-slate-500 max-w-28 truncate" [title]="row.scheme">{{ row.scheme || '—' }}</td>
+                                <td class="px-3 py-2 text-slate-600">{{ row.dept || '—' }}</td>
+                                <td class="px-3 py-2 text-slate-600 max-w-32 truncate">{{ row.loc || '—' }}</td>
+                                <td class="px-3 py-2 text-right text-slate-700">{{ row.cost | number }}</td>
+                                <td class="px-3 py-2 text-center text-slate-600">{{ row.physical }}%</td>
+                                <td class="px-3 py-2">
+                                    <span class="px-2 py-0.5 rounded-full text-white text-xs font-semibold"
+                                          [class.bg-blue-500]="row.status === 'In Progress'"
+                                          [class.bg-green-600]="row.status === 'Completed'"
+                                          [class.bg-red-500]="row.status === 'Stuck'"
+                                          [class.bg-slate-400]="row.status === 'Planned'">{{ row.status }}</span>
+                                </td>
+                                <td class="px-3 py-2 text-center">
+                                    <button (click)="removeExcelRow($index)" aria-label="Remove row"
+                                            class="text-slate-300 hover:text-red-500 transition">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Invalid rows hint -->
+                @if (excelRows().length - excelValidCount() > 0) {
+                <p class="text-xs text-red-600 flex items-center gap-1">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Hover the <i class="fa-solid fa-circle-exclamation"></i> icon on red rows to see validation errors. Only valid rows will be imported.
+                </p>
+                }
+            </div>
+            }
+
+            <!-- Progress bar -->
+            @if (importProgress(); as prog) {
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-500">
+                    <span>Importing…</span>
+                    <span>{{ prog.done }} / {{ prog.total }}</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div class="h-2 bg-emerald-500 rounded-full transition-all duration-300"
+                         [style.width.%]="(prog.done / prog.total) * 100"></div>
+                </div>
+            </div>
+            }
+
+            <!-- Success banner -->
+            @if (importDone()) {
+            <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 text-sm text-emerald-700 font-semibold">
+                <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                {{ importProgress()?.total }} project(s) imported successfully! Closing…
+            </div>
+            }
+
+            <!-- Import error -->
+            @if (importError() && excelRows().length > 0) {
+            <div class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+                <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                <span>{{ importError() }}</span>
+            </div>
+            }
+
+        </div>
+
+        <!-- Import footer -->
+        <div class="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 flex-shrink-0">
+            <p class="text-xs text-slate-400">
+                @if (excelRows().length > 0) {
+                    <span><strong class="text-emerald-700">{{ excelValidCount() }}</strong> of {{ excelRows().length }} rows will be imported</span>
+                }
+            </p>
+            <div class="flex gap-3">
+                <button (click)="closeNewProjectModal()"
+                        class="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 transition">
+                    Cancel
+                </button>
+                <button (click)="importExcelProjects()"
+                        [disabled]="excelValidCount() === 0 || isImporting() || importDone()"
+                        class="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (isImporting()) {
+                        <i class="fa-solid fa-spinner animate-spin"></i> Importing…
+                    } @else if (importDone()) {
+                        <i class="fa-solid fa-circle-check"></i> Done!
+                    } @else {
+                        <i class="fa-solid fa-file-import"></i>
+                        Import {{ excelValidCount() > 0 ? excelValidCount() : '' }} Project{{ excelValidCount() !== 1 ? 's' : '' }}
+                    }
+                </button>
+            </div>
+        </div>
+        } <!-- end import tab -->
 
     </div>
 </div>
