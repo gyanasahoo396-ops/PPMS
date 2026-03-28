@@ -37,11 +37,14 @@
                 class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition">
                 <i class="fa-solid fa-file-excel"></i> Import Excel
             </button>
+<<<<<<< HEAD
             <!-- Export all projects to multi-sheet Excel -->
             <button (click)="downloadAllProjects()" [disabled]="!allProjects().length"
                 class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-file-arrow-down"></i> Export Excel
             </button>
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
         </div>
     </div>
 
@@ -638,6 +641,7 @@
             </div>
             }
 
+<<<<<<< HEAD
             <!-- Success banner replaced by summary -->
             @if (importDone()) {
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 overflow-hidden">
@@ -665,6 +669,13 @@
                     </div>
                     }
                 </div>
+=======
+            <!-- Success banner -->
+            @if (importDone()) {
+            <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 text-sm text-emerald-700 font-semibold">
+                <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                {{ importProgress()?.total }} project(s) imported successfully! Closing…
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
             </div>
             }
 
@@ -681,6 +692,7 @@
         <!-- Import footer -->
         <div class="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 flex-shrink-0">
             <p class="text-xs text-slate-400">
+<<<<<<< HEAD
                 @if (importDone()) {
                     <span class="text-emerald-600 font-semibold">Import complete. Review the summary above.</span>
                 } @else if (excelRows().length > 0) {
@@ -690,11 +702,16 @@
                     </span>
                 } @else {
                     <span>Required fields: <strong>Name of Project, Name of Scheme, Village/Location, Estimate Cost</strong></span>
+=======
+                @if (excelRows().length > 0) {
+                    <span><strong class="text-emerald-700">{{ excelValidCount() }}</strong> of {{ excelRows().length }} rows will be imported</span>
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
                 }
             </p>
             <div class="flex gap-3">
                 <button (click)="closeNewProjectModal()"
                         class="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 transition">
+<<<<<<< HEAD
                     @if (importDone()) { Close } @else { Cancel }
                 </button>
                 @if (!importDone()) {
@@ -703,12 +720,26 @@
                         class="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
                     @if (isImporting()) {
                         <i class="fa-solid fa-spinner animate-spin"></i> Importing…
+=======
+                    Cancel
+                </button>
+                <button (click)="importExcelProjects()"
+                        [disabled]="excelValidCount() === 0 || isImporting() || importDone()"
+                        class="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (isImporting()) {
+                        <i class="fa-solid fa-spinner animate-spin"></i> Importing…
+                    } @else if (importDone()) {
+                        <i class="fa-solid fa-circle-check"></i> Done!
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
                     } @else {
                         <i class="fa-solid fa-file-import"></i>
                         Import {{ excelValidCount() > 0 ? excelValidCount() : '' }} Project{{ excelValidCount() !== 1 ? 's' : '' }}
                     }
                 </button>
+<<<<<<< HEAD
                 }
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
             </div>
         </div>
         } <!-- end import tab -->

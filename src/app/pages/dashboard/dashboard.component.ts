@@ -90,6 +90,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     seedError  = signal<string | null>(null);
     seedDone   = signal(false);
 
+<<<<<<< HEAD
     // Cleanup: unknown (bad-import) departments
     isDeletingDept = signal<string | null>(null);
     deleteDeptError = signal<string | null>(null);
@@ -104,6 +105,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         return Array.from(groups.entries()).map(([dept, projects]) => ({ dept, count: projects.length, ids: projects.map(p => p.id) }));
     });
 
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     // Excel import state
     activeModalTab = signal<'manual' | 'import'>('manual');
     excelRows = signal<ExcelImportRow[]>([]);
@@ -112,7 +115,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     importProgress = signal<{ done: number; total: number } | null>(null);
     importDone = signal(false);
     isDragOver = signal(false);
+<<<<<<< HEAD
     importSummary = signal<{ dept: string; schemes: { name: string; count: number }[] }[]>([]);
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     excelValidCount = computed(() => this.excelRows().filter(r => r._valid).length);
 
     // Scheme dropdown state
@@ -145,7 +151,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     newProjectForm!: FormGroup;
 
     private deptSchemesService = inject(DepartmentSchemesService);
+<<<<<<< HEAD
     readonly deptEntries = this.deptSchemesService.getDepartments();
+=======
+    private readonly deptEntries = this.deptSchemesService.getDepartments();
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     readonly departments = this.deptEntries.map(d => d.shortName);
     readonly statusOptions = ['Planned', 'In Progress', 'Completed', 'Stuck'];
     readonly schemesByDept: Record<string, string[]> = Object.fromEntries(
@@ -157,7 +167,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.firestoreService.getProjects$().pipe(takeUntil(this.destroy$)).subscribe({
             next: projects => {
                 if (projects.length > 0) {
+<<<<<<< HEAD
                     this.allProjects.set(projects);
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
                     // Derive KPI stats live from Firestore
                     this.stats.set({
                         totalProjects:   projects.length,
@@ -189,7 +202,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.departmentBreakdown.set(liveBreakdown);
                 } else {
                     // Fall back to static data when Firestore has no projects yet
+<<<<<<< HEAD
                     this.allProjects.set(this.projectService.getAllProjects());
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
                     this.stats.set(this.projectService.getProjectStats());
                     this.priorityProjects.set(this.projectService.getPriorityProjects());
                     this.highVisibilityProjects.set(this.projectService.getHighVisibilityProjects());
@@ -197,7 +213,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
             },
             error: () => {
+<<<<<<< HEAD
                 this.allProjects.set(this.projectService.getAllProjects());
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
                 this.stats.set(this.projectService.getProjectStats());
                 this.priorityProjects.set(this.projectService.getPriorityProjects());
                 this.highVisibilityProjects.set(this.projectService.getHighVisibilityProjects());
@@ -264,7 +283,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.excelRows.set([]);
         this.importProgress.set(null);
         this.importDone.set(false);
+<<<<<<< HEAD
         this.importSummary.set([]);
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     }
 
     async createProject(): Promise<void> {
@@ -559,12 +581,19 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             row['name_of_the_executant'] ?? row['executant'] ?? row['contractor'] ?? ''
         ).trim();
 
+<<<<<<< HEAD
         // Validation — ALL four fields are mandatory for import
         const errors: string[] = [];
         if (!name || name.length < 3)   errors.push('Project name required (min 3 chars)');
         if (!scheme)                     errors.push('Name of scheme is required');
         if (!loc)                        errors.push('Village / location is required');
         if (isNaN(cost) || cost <= 0)    errors.push('Estimate cost must be > 0');
+=======
+        // Validation — only name and cost are strictly required; other fields have sensible defaults
+        const errors: string[] = [];
+        if (!name || name.length < 3) errors.push('Project name required (min 3 chars)');
+        if (isNaN(cost) || cost < 0)  errors.push('Cost must be ≥ 0');
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
         if (!['Planned', 'In Progress', 'Completed', 'Stuck'].includes(status)) {
             errors.push(`Unknown status "${rawStatus}"`);
         }
@@ -580,9 +609,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.excelRows.update(rows => rows.filter((_, i) => i !== index));
     }
 
+<<<<<<< HEAD
     /** Used in template to sum scheme counts in import summary */
     readonly sumCount = (acc: number, s: { count: number }) => acc + s.count;
 
+=======
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     async importExcelProjects(): Promise<void> {
         const valid = this.excelRows().filter(r => r._valid);
         if (!valid.length) return;
@@ -610,6 +642,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                 done++;
                 this.importProgress.set({ done, total: valid.length });
             }
+<<<<<<< HEAD
             // Build summary grouped by dept → scheme
             const deptMap = new Map<string, Map<string, number>>();
             for (const row of valid) {
@@ -627,6 +660,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             );
             this.importDone.set(true);
             // No auto-close — user reads the summary and clicks Done
+=======
+            this.importDone.set(true);
+            setTimeout(() => this.closeNewProjectModal(), 1800);
+>>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
         } catch (err: unknown) {
             const code = (err as { code?: string })?.code;
             if (code === 'permission-denied') {
