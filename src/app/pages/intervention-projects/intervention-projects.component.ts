@@ -5,6 +5,7 @@ import { FirestoreProjectService } from '../../services/firestore-project.servic
 import { ProjectDataService } from '../../services/project-data.service';
 import { Project } from '../../models/project.model';
 import { MobilePageHeaderComponent } from '../../components/mobile-page-header/mobile-page-header.component';
+import { calculateExpectedProgress, isOverdueByDays } from '../../utils/progress.utils';
 
 type FilterType = 'hm' | 'high-visibility' | 'delayed' | 'low-progress' | 'recurring';
 
@@ -88,6 +89,17 @@ export class InterventionProjectsComponent implements OnInit, OnDestroy {
 
     activeFilter = signal<FilterType>('hm');
 
+    // ── Bulk select / delete ──────────────────────────────────────────────
+    selectedIds           = signal<Set<string>>(new Set());
+    showBulkDeleteConfirm = signal(false);
+    isBulkDeleting        = signal(false);
+    bulkDeleteSuccess     = signal<string | null>(null);
+
+    isAllSelected = computed<boolean>(() => {
+        const list = this.projects();
+        return list.length > 0 && list.every(p => this.selectedIds().has(p.id));
+    });
+
     // Start with static legacy data; Firestore will merge in on ngOnInit
     private readonly staticProjects = this.projectDataService.getAllProjects();
     private allProjects = signal<Project[]>(this.staticProjects);
@@ -100,9 +112,22 @@ export class InterventionProjectsComponent implements OnInit, OnDestroy {
             case 'high-visibility':
                 return all.filter(p => p.visibility === 'High Visibility' || p.visibility === 'HM Committed' || !!p.hmPriority);
             case 'delayed':
-                return all.filter(p => p.status === 'Stuck');
+                return all.filter(p => {
+                    if (p.status === 'Completed') return false;
+                    if (p.status === 'Stuck') return true;
+                    // past target date by > 60 days
+                    if (p.end && isOverdueByDays(p.end, p.status, 60)) return true;
+                    // significantly behind expected progress
+                    if (p.start && p.end) {
+                        const exp = calculateExpectedProgress(p.start, p.end);
+                        if ((p.physical ?? 0) < exp - 15) return true;
+                    }
+                    return false;
+                });
             case 'low-progress':
-                return all.filter(p => (p.physical ?? 0) < 50);
+                return all.filter(p =>
+                    p.status !== 'Completed' && (p.physical ?? 0) < 50
+                );
             case 'recurring':
                 return all.filter(p => !!p.recurringIntervention);
             default:
@@ -176,6 +201,45 @@ export class InterventionProjectsComponent implements OnInit, OnDestroy {
 
     goBack(): void {
         this.router.navigate(['/home']);
+    }
+
+    // ── Bulk select / delete ──────────────────────────────────────────────
+
+    toggleSelect(id: string): void {
+        const s = new Set(this.selectedIds());
+        if (s.has(id)) s.delete(id); else s.add(id);
+        this.selectedIds.set(s);
+    }
+
+    toggleSelectAll(): void {
+        const list = this.projects();
+        this.selectedIds.set(
+            this.isAllSelected() ? new Set() : new Set(list.map(p => p.id))
+        );
+    }
+
+    clearSelection(): void {
+        this.selectedIds.set(new Set());
+        this.showBulkDeleteConfirm.set(false);
+    }
+
+    async bulkDeleteProjects(): Promise<void> {
+        this.isBulkDeleting.set(true);
+        const ids = [...this.selectedIds()].filter(id => !id.startsWith('static-'));
+        try {
+            await Promise.all(ids.map(id => this.firestoreService.deleteProject(id)));
+            // Remove from allProjects signal
+            this.allProjects.set(this.allProjects().filter(p => !this.selectedIds().has(p.id)));
+            const count = this.selectedIds().size;
+            this.selectedIds.set(new Set());
+            this.showBulkDeleteConfirm.set(false);
+            this.bulkDeleteSuccess.set(`${count} project${count > 1 ? 's' : ''} deleted successfully.`);
+            setTimeout(() => this.bulkDeleteSuccess.set(null), 3500);
+        } catch (err) {
+            console.error('Bulk delete failed:', err);
+        } finally {
+            this.isBulkDeleting.set(false);
+        }
     }
 
     protected readonly Math = Math;

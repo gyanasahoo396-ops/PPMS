@@ -6,6 +6,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(2rem); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out both;
+}
+
 @layer base {
   body {
     @apply bg-slate-50 text-slate-900 antialiased;

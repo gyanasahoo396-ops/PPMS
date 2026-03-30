@@ -685,7 +685,63 @@
   color: #fff;
 }
 
+/* ── Scheme card action buttons (edit / delete) ── */
+.scheme-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.scheme-card:hover .scheme-card-actions { opacity: 1; }
 
+.scheme-card-edit-btn,
+.scheme-card-delete-btn {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.scheme-card-edit-btn {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.scheme-card-edit-btn:hover { background: #dbeafe; }
+.scheme-card-delete-btn {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.scheme-card-delete-btn:hover { background: #fee2e2; }
+
+/* ── Add Scheme button (outside admin bar) ── */
+.btn-add-scheme {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: #059669;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-add-scheme:hover { background: #047857; }
+
+/* ── Row selection highlight ── */
+.row-selected td { background: #eff6ff !important; }
+.row-selected:hover td { background: #dbeafe !important; }
 
 /* ==========================================================
    Drawer – Backdrop

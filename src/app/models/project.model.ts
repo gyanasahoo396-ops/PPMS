@@ -18,6 +18,16 @@ export interface Project {
     executingAgency?: string; // For high visibility projects
     roadLength?: number; // Road length in km
     division?: string; // RD Division
+    // Field inspection photos
+    beforeImageUrl?: string;    // Firebase Storage download URL
+    currentImageUrl?: string;   // Firebase Storage download URL
+    photoUploadedAt?: string;   // ISO date string of last photo upload
+    photoStatus?: 'none' | 'before-only' | 'both'; // derived from image presence
+    // Progress tracking (computed and persisted on save)
+    expectedProgress?: number;  // ((today-start)/(end-start))*100 — saved at edit time
+    statusCategory?: 'Delayed' | 'LowProgress' | 'OnTrack' | 'Completed'; // classification
+    // Multi-photo gallery (new system)
+    photos?: string[];  // array of Firebase Storage download URLs
 }
 
 export interface ProjectStats {

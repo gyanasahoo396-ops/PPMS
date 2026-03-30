@@ -13,6 +13,7 @@ import { UserRole } from '../../models/user.model';
 import { Project, ProjectStats, RDSchemeData } from '../../models/project.model';
 import { MobilePageHeaderComponent } from '../../components/mobile-page-header/mobile-page-header.component';
 import { DepartmentSchemesService } from '../../services/department-schemes.service';
+import { PhotoUploadService } from '../../services/photo-upload.service';
 
 Chart.register(...registerables);
 
@@ -83,14 +84,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     // Create-project modal state
     showNewProjectModal = signal(false);
     isSaving = signal(false);
-    isSeeding = signal(false);
     saveError = signal<string | null>(null);
 
-    // Seed state
-    seedError  = signal<string | null>(null);
-    seedDone   = signal(false);
+    // Pending photos for new project (queued before project ID exists)
+    pendingPhotoFiles   = signal<File[]>([]);
+    pendingPhotoPreviews = signal<string[]>([]);
+    isUploadingPhotos   = signal(false);
 
-<<<<<<< HEAD
     // Cleanup: unknown (bad-import) departments
     isDeletingDept = signal<string | null>(null);
     deleteDeptError = signal<string | null>(null);
@@ -105,8 +105,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         return Array.from(groups.entries()).map(([dept, projects]) => ({ dept, count: projects.length, ids: projects.map(p => p.id) }));
     });
 
-=======
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     // Excel import state
     activeModalTab = signal<'manual' | 'import'>('manual');
     excelRows = signal<ExcelImportRow[]>([]);
@@ -115,10 +113,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     importProgress = signal<{ done: number; total: number } | null>(null);
     importDone = signal(false);
     isDragOver = signal(false);
-<<<<<<< HEAD
     importSummary = signal<{ dept: string; schemes: { name: string; count: number }[] }[]>([]);
-=======
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     excelValidCount = computed(() => this.excelRows().filter(r => r._valid).length);
 
     // Scheme dropdown state
@@ -129,6 +124,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private firestoreService = inject(FirestoreProjectService);
     private projectService  = inject(ProjectDataService);
     private authService     = inject(AuthService);
+    private photoService    = inject(PhotoUploadService);
     private fb              = inject(FormBuilder);
     private router          = inject(Router);
     private destroy$        = new Subject<void>();
@@ -151,11 +147,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     newProjectForm!: FormGroup;
 
     private deptSchemesService = inject(DepartmentSchemesService);
-<<<<<<< HEAD
     readonly deptEntries = this.deptSchemesService.getDepartments();
-=======
-    private readonly deptEntries = this.deptSchemesService.getDepartments();
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     readonly departments = this.deptEntries.map(d => d.shortName);
     readonly statusOptions = ['Planned', 'In Progress', 'Completed', 'Stuck'];
     readonly schemesByDept: Record<string, string[]> = Object.fromEntries(
@@ -167,10 +159,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.firestoreService.getProjects$().pipe(takeUntil(this.destroy$)).subscribe({
             next: projects => {
                 if (projects.length > 0) {
-<<<<<<< HEAD
                     this.allProjects.set(projects);
-=======
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
                     // Derive KPI stats live from Firestore
                     this.stats.set({
                         totalProjects:   projects.length,
@@ -202,10 +191,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.departmentBreakdown.set(liveBreakdown);
                 } else {
                     // Fall back to static data when Firestore has no projects yet
-<<<<<<< HEAD
                     this.allProjects.set(this.projectService.getAllProjects());
-=======
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
                     this.stats.set(this.projectService.getProjectStats());
                     this.priorityProjects.set(this.projectService.getPriorityProjects());
                     this.highVisibilityProjects.set(this.projectService.getHighVisibilityProjects());
@@ -213,10 +199,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
             },
             error: () => {
-<<<<<<< HEAD
                 this.allProjects.set(this.projectService.getAllProjects());
-=======
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
                 this.stats.set(this.projectService.getProjectStats());
                 this.priorityProjects.set(this.projectService.getPriorityProjects());
                 this.highVisibilityProjects.set(this.projectService.getHighVisibilityProjects());
@@ -279,14 +262,35 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     closeNewProjectModal(): void {
+        // Revoke any blob URLs created for photo previews
+        this.pendingPhotoPreviews().forEach(u => URL.revokeObjectURL(u));
+        this.pendingPhotoFiles.set([]);
+        this.pendingPhotoPreviews.set([]);
         this.showNewProjectModal.set(false);
         this.excelRows.set([]);
         this.importProgress.set(null);
         this.importDone.set(false);
-<<<<<<< HEAD
         this.importSummary.set([]);
-=======
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
+    }
+
+    // ── Pending photos for new project ────────────────────────────────────
+    onCreateModalPhotoSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const files = Array.from(input.files ?? []);
+        input.value = '';
+
+        const valid = files.filter(f => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024);
+        if (valid.length === 0) return;
+
+        const newPreviews = valid.map(f => URL.createObjectURL(f));
+        this.pendingPhotoFiles.update(list => [...list, ...valid]);
+        this.pendingPhotoPreviews.update(list => [...list, ...newPreviews]);
+    }
+
+    removePendingPhoto(index: number): void {
+        URL.revokeObjectURL(this.pendingPhotoPreviews()[index]);
+        this.pendingPhotoFiles.update(list => list.filter((_, i) => i !== index));
+        this.pendingPhotoPreviews.update(list => list.filter((_, i) => i !== index));
     }
 
     async createProject(): Promise<void> {
@@ -309,6 +313,24 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                 remarks: v.remarks ?? '',
                 scheme: v.scheme ?? ''
             });
+
+            // Upload any pending photos now that we have a real project ID
+            const files = this.pendingPhotoFiles();
+            if (files.length > 0) {
+                this.isUploadingPhotos.set(true);
+                try {
+                    const urls = await Promise.all(
+                        files.map(f => this.photoService.uploadPhoto(id, f))
+                    );
+                    await this.firestoreService.updateProject(id, { photos: urls });
+                } catch (photoErr) {
+                    console.warn('Photo upload during creation failed:', photoErr);
+                    // Non-fatal: project is already created, navigate anyway
+                } finally {
+                    this.isUploadingPhotos.set(false);
+                }
+            }
+
             this.closeNewProjectModal();
             this.router.navigate(['/dhamnagar-dashboard/project', id]);
         } catch (err: unknown) {
@@ -581,19 +603,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             row['name_of_the_executant'] ?? row['executant'] ?? row['contractor'] ?? ''
         ).trim();
 
-<<<<<<< HEAD
         // Validation — ALL four fields are mandatory for import
         const errors: string[] = [];
         if (!name || name.length < 3)   errors.push('Project name required (min 3 chars)');
         if (!scheme)                     errors.push('Name of scheme is required');
         if (!loc)                        errors.push('Village / location is required');
         if (isNaN(cost) || cost <= 0)    errors.push('Estimate cost must be > 0');
-=======
-        // Validation — only name and cost are strictly required; other fields have sensible defaults
-        const errors: string[] = [];
-        if (!name || name.length < 3) errors.push('Project name required (min 3 chars)');
-        if (isNaN(cost) || cost < 0)  errors.push('Cost must be ≥ 0');
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
         if (!['Planned', 'In Progress', 'Completed', 'Stuck'].includes(status)) {
             errors.push(`Unknown status "${rawStatus}"`);
         }
@@ -609,12 +624,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.excelRows.update(rows => rows.filter((_, i) => i !== index));
     }
 
-<<<<<<< HEAD
     /** Used in template to sum scheme counts in import summary */
     readonly sumCount = (acc: number, s: { count: number }) => acc + s.count;
 
-=======
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
     async importExcelProjects(): Promise<void> {
         const valid = this.excelRows().filter(r => r._valid);
         if (!valid.length) return;
@@ -642,7 +654,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
                 done++;
                 this.importProgress.set({ done, total: valid.length });
             }
-<<<<<<< HEAD
             // Build summary grouped by dept → scheme
             const deptMap = new Map<string, Map<string, number>>();
             for (const row of valid) {
@@ -660,10 +671,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             );
             this.importDone.set(true);
             // No auto-close — user reads the summary and clicks Done
-=======
-            this.importDone.set(true);
-            setTimeout(() => this.closeNewProjectModal(), 1800);
->>>>>>> 1f8734567965b876087a39abe673b8c7f6502f7e
         } catch (err: unknown) {
             const code = (err as { code?: string })?.code;
             if (code === 'permission-denied') {
@@ -698,25 +705,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         XLSX.utils.book_append_sheet(wb, ws1, 'Standard Format');
         XLSX.utils.book_append_sheet(wb, ws2, 'GP Format (sample)');
         XLSX.writeFile(wb, 'project_import_template.xlsx');
-    }
-
-    // ── Admin: seed static data to Firestore ────────────────────────────
-    async seedStaticDataToFirestore(): Promise<void> {
-        if (!this.isAdmin()) return;
-        this.isSeeding.set(true);
-        this.seedError.set(null);
-        this.seedDone.set(false);
-        try {
-            await this.firestoreService.seedProjects(this.projectService.getAllProjects());
-            this.seedDone.set(true);
-            setTimeout(() => this.seedDone.set(false), 4000);
-        } catch (err: unknown) {
-            const msg = (err as Error)?.message ?? String(err);
-            this.seedError.set(msg);
-            console.error('Seeding failed:', err);
-        } finally {
-            this.isSeeding.set(false);
-        }
     }
 
     navigateToStuck(): void {
@@ -843,80 +831,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         } finally {
             this.isDeletingDept.set(null);
         }
-    }
-
-    // ── Export all projects to multi-sheet Excel ─────────────────────────
-    downloadAllProjects(): void {
-        const projects = this.allProjects();
-        if (!projects.length) return;
-
-        const wb = XLSX.utils.book_new();
-
-        const COL_WIDTHS = [
-            { wch: 6 }, { wch: 42 }, { wch: 28 }, { wch: 22 }, { wch: 10 },
-            { wch: 10 }, { wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 12 },
-            { wch: 8 },  { wch: 28 }
-        ];
-        const HEADERS = [
-            'Sl.No', 'Project Name', 'Scheme', 'Location', 'Cost (₹L)',
-            'Spent (₹L)', 'Physical %', 'Status', 'Start', 'End',
-            'Priority', 'Remarks'
-        ];
-
-        const toRow = (p: Project, sl: number): unknown[] => [
-            sl, p.name, p.scheme ?? '', p.loc ?? '', p.cost ?? 0,
-            p.spent ?? 0, p.physical ?? 0, p.status,
-            p.start ?? '', p.end ?? '',
-            p.priority || p.hmPriority ? 'Yes' : 'No',
-            p.remarks ?? ''
-        ];
-
-        // ── Sheet per department ──────────────────────────────────────
-        const deptMap = new Map<string, Project[]>();
-        for (const p of projects) {
-            const key = p.dept || 'Others';
-            if (!deptMap.has(key)) deptMap.set(key, []);
-            deptMap.get(key)!.push(p);
-        }
-        for (const [dept, deptProjects] of deptMap.entries()) {
-            const rows: unknown[][] = [HEADERS];
-            deptProjects.forEach((p, i) => rows.push(toRow(p, i + 1)));
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = COL_WIDTHS;
-            XLSX.utils.book_append_sheet(wb, ws, dept.slice(0, 31)); // sheet name max 31 chars
-        }
-
-        // ── All Projects sheet ────────────────────────────────────────
-        const allRows: unknown[][] = [HEADERS];
-        projects.forEach((p, i) => allRows.push(toRow(p, i + 1)));
-        const wsAll = XLSX.utils.aoa_to_sheet(allRows);
-        wsAll['!cols'] = COL_WIDTHS;
-        XLSX.utils.book_append_sheet(wb, wsAll, 'All Projects');
-
-        // ── Summary sheet ─────────────────────────────────────────────
-        const summaryHeaders = ['Department', 'Total', 'Cost (₹L)', 'Spent (₹L)', 'Completed', 'In Progress', 'Stuck', 'Planned'];
-        const summaryRows: unknown[][] = [summaryHeaders];
-        for (const [dept, deptProjects] of deptMap.entries()) {
-            summaryRows.push([
-                dept,
-                deptProjects.length,
-                deptProjects.reduce((s, p) => s + (p.cost ?? 0), 0),
-                deptProjects.reduce((s, p) => s + (p.spent ?? 0), 0),
-                deptProjects.filter(p => p.status === 'Completed').length,
-                deptProjects.filter(p => p.status === 'In Progress').length,
-                deptProjects.filter(p => p.status === 'Stuck').length,
-                deptProjects.filter(p => p.status === 'Planned').length
-            ]);
-        }
-        const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
-        wsSummary['!cols'] = [
-            { wch: 20 }, { wch: 8 }, { wch: 12 }, { wch: 12 },
-            { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 10 }
-        ];
-        XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
-
-        const today = new Date().toISOString().split('T')[0];
-        XLSX.writeFile(wb, `projects_export_${today}.xlsx`);
     }
 
     ngOnDestroy(): void {

@@ -14,6 +14,7 @@ export interface SchemeProject {
   status?: 'Completed' | 'In Progress' | 'Stuck' | 'Planned';
   hmPriority?: boolean;           // HM Priority — project shown on HM Priorities page
   recurringIntervention?: boolean; // Recurring — project shown on Intervention recurring tab
+  photos?: string[];               // Firebase Storage download URLs
 }
 
 // ---------- Scheme card (summary) ----------

@@ -173,6 +173,59 @@
               </div>
             </div>
 
+            <!-- Progress Preview -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2" aria-label="Progress preview">
+              <div class="flex items-center justify-between text-xs font-semibold text-slate-600">
+                <span class="uppercase tracking-wide">Progress Preview</span>
+                <div class="flex items-center gap-4">
+                  <span class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
+                    Actual: {{ progressPreview() }}%
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+                    Expected: {{ expectedPreview() }}%
+                  </span>
+                </div>
+              </div>
+              <!-- Progress bar with expected-progress marker -->
+              <div class="relative w-full bg-slate-200 rounded-full h-4 overflow-hidden">
+                <div class="absolute inset-y-0 left-0 rounded-full transition-all duration-300"
+                     [class]="progressCategory() === 'Delayed' ? 'bg-red-500' : progressCategory() === 'LowProgress' ? 'bg-amber-500' : progressCategory() === 'Completed' ? 'bg-emerald-500' : 'bg-blue-500'"
+                     [style.width.%]="progressPreview()"></div>
+                <div class="absolute inset-y-0 w-0.5 bg-amber-400"
+                     [style.left.%]="expectedPreview()"
+                     title="Expected progress"></div>
+              </div>
+              <!-- Classification label -->
+              @switch (progressCategory()) {
+                @case ('Delayed') {
+                  <p class="flex items-center gap-1.5 text-red-700 text-xs font-semibold" role="status">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Delayed &mdash; progress is behind expected pace
+                  </p>
+                }
+                @case ('LowProgress') {
+                  <p class="flex items-center gap-1.5 text-amber-700 text-xs font-semibold" role="status">
+                    <i class="fa-solid fa-clock"></i>
+                    Low Progress &mdash; below 50% completion
+                  </p>
+                }
+                @case ('Completed') {
+                  <p class="flex items-center gap-1.5 text-emerald-700 text-xs font-semibold" role="status">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Completed
+                  </p>
+                }
+                @default {
+                  <p class="flex items-center gap-1.5 text-blue-700 text-xs font-semibold" role="status">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                    On Track
+                  </p>
+                }
+              }
+            </div>
+
             <!-- Start + End -->
             <div class="grid grid-cols-2 gap-4">
               <div>
@@ -200,6 +253,18 @@
               </label>
               <textarea id="ep-remarks" formControlName="remarks" rows="3"
                         class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"></textarea>
+            </div>
+
+            <!-- Photos (also manageable in edit mode) -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                <i class="fa-solid fa-images text-slate-400 mr-1" aria-hidden="true"></i> Project Photos
+              </label>
+              <app-photo-upload
+                [photos]="project()!.photos ?? []"
+                [projectId]="project()!.id"
+                [canEdit]="true"
+                (photosChange)="onPhotosChanged($event)" />
             </div>
 
             @if (saveError()) {
@@ -241,9 +306,36 @@
                 <span [class]="'badge-professional ' + getStatusClass(project()!.status)">{{ project()!.status }}</span>
                 <span class="text-2xl font-bold text-slate-900">{{ project()!.physical }}%</span>
               </div>
-              <div class="w-full bg-slate-200 rounded-full h-2.5 mt-3 shadow-inner">
-                <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full shadow-sm transition-all duration-500"
+              <div class="relative w-full bg-slate-200 rounded-full h-2.5 mt-3 shadow-inner overflow-hidden">
+                <div class="h-full rounded-full shadow-sm transition-all duration-500"
+                     [class]="viewStatusCategory() === 'Delayed' ? 'bg-red-500' : viewStatusCategory() === 'LowProgress' ? 'bg-amber-500' : viewStatusCategory() === 'Completed' ? 'bg-emerald-500' : 'bg-gradient-to-r from-blue-500 to-blue-600'"
                      [style.width.%]="project()!.physical"></div>
+              </div>
+              <!-- Classification badge below progress bar -->
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-xs text-slate-400">Expected: {{ viewExpectedProgress() }}%</span>
+                @switch (viewStatusCategory()) {
+                  @case ('Delayed') {
+                    <span class="text-xs font-bold text-red-700 flex items-center gap-1">
+                      <i class="fa-solid fa-triangle-exclamation"></i> Delayed
+                    </span>
+                  }
+                  @case ('LowProgress') {
+                    <span class="text-xs font-bold text-amber-700 flex items-center gap-1">
+                      <i class="fa-solid fa-clock"></i> Low Progress
+                    </span>
+                  }
+                  @case ('Completed') {
+                    <span class="text-xs font-bold text-emerald-700 flex items-center gap-1">
+                      <i class="fa-solid fa-circle-check"></i> Completed
+                    </span>
+                  }
+                  @default {
+                    <span class="text-xs font-bold text-blue-700 flex items-center gap-1">
+                      <i class="fa-solid fa-arrow-trend-up"></i> On Track
+                    </span>
+                  }
+                }
               </div>
             </div>
 
@@ -278,38 +370,30 @@
             </div>
           </div>
 
-          <!-- Field Inspection Photos -->
+          <!-- Project Photos -->
           <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
             <span class="w-1.5 h-8 bg-brand-600 rounded-full"></span>
-            <i class="fa-solid fa-camera text-brand-600" aria-hidden="true"></i> Field Inspection Photos
+            <i class="fa-solid fa-images text-brand-600" aria-hidden="true"></i> Project Photos
+            @if ((project()!.photos ?? []).length > 0) {
+              <span class="text-xs font-semibold px-2.5 py-1 bg-brand-100 text-brand-700 rounded-full">
+                {{ (project()!.photos ?? []).length }}&nbsp;photo{{ (project()!.photos ?? []).length === 1 ? '' : 's' }}
+              </span>
+            }
           </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-            <div class="border-2 border-slate-200 rounded-2xl overflow-hidden bg-slate-50 shadow-sm hover:shadow-md transition-all">
-              <div class="h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative group">
-                <i class="fa-solid fa-image text-5xl text-slate-300" aria-hidden="true"></i>
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all"></div>
-                <div class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                  <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> 01 Jan 2023
-                </div>
-              </div>
-              <div class="p-3 bg-white">
-                <p class="font-bold text-slate-700 text-sm">Before Execution</p>
-                <p class="text-xs text-slate-500 mt-1">Geo: 20.945° N, 86.452° E</p>
-              </div>
+
+          @if (photoSaveError()) {
+            <div class="mb-4 flex items-center gap-2 px-4 py-2.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm" role="alert">
+              <i class="fa-solid fa-triangle-exclamation text-red-500" aria-hidden="true"></i>
+              {{ photoSaveError() }}
             </div>
-            <div class="border-2 border-slate-200 rounded-2xl overflow-hidden bg-slate-50 shadow-sm hover:shadow-md transition-all">
-              <div class="h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative group">
-                <i class="fa-solid fa-image text-5xl text-slate-300" aria-hidden="true"></i>
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all"></div>
-                <div class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                  <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> 15 Oct 2023
-                </div>
-              </div>
-              <div class="p-3 bg-white">
-                <p class="font-bold text-slate-700 text-sm">Current Status</p>
-                <p class="text-xs text-slate-500 mt-1">Geo: 20.945° N, 86.452° E</p>
-              </div>
-            </div>
+          }
+
+          <div class="mb-8">
+            <app-photo-upload
+              [photos]="project()!.photos ?? []"
+              [projectId]="project()!.id"
+              [canEdit]="canEdit()"
+              (photosChange)="onPhotosChanged($event)" />
           </div>
 
           <!-- Remarks -->

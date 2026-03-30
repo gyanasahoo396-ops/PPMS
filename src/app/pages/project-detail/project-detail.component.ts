@@ -2,16 +2,18 @@ import { Component, OnInit, OnDestroy, signal, computed, inject, ChangeDetection
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { ProjectDataService } from '../../services/project-data.service';
+import { calculateExpectedProgress, classifyProjectStatus, StatusCategory } from '../../utils/progress.utils';
 import { FirestoreProjectService } from '../../services/firestore-project.service';
 import { AuthService } from '../../services/auth.service';
 import { UserRole } from '../../models/user.model';
 import { Project } from '../../models/project.model';
+import { PhotoUploadComponent } from '../../components/photo-upload/photo-upload.component';
 
 @Component({
     selector: 'app-project-detail',
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, PhotoUploadComponent],
     templateUrl: './project-detail.component.html',
     styleUrls: ['./project-detail.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -24,6 +26,27 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     isDeleting      = signal(false);
     saveError       = signal<string | null>(null);
     isFirestoreDoc  = signal(false);   // true once found in Firestore
+
+    // Photo save error (shown in UI when Firestore update fails)
+    photoSaveError = signal<string | null>(null);
+
+    // ── Progress tracking (view mode) ────────────────────────────────────
+    viewExpectedProgress = computed(() => {
+        const p = this.project();
+        if (!p?.start || !p?.end) return 0;
+        return calculateExpectedProgress(p.start, p.end);
+    });
+    viewStatusCategory = computed<StatusCategory>(() => {
+        const p = this.project();
+        if (!p) return 'OnTrack';
+        return classifyProjectStatus(p.physical ?? 0, this.viewExpectedProgress(), p.end);
+    });
+
+    // ── Progress tracking (edit mode live preview) ────────────────────
+    progressPreview  = signal(0);
+    expectedPreview  = signal(0);
+    progressCategory = signal<StatusCategory>('OnTrack');
+    private progSub: Subscription | null = null;
 
     editForm!: FormGroup;
 
@@ -89,11 +112,29 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             priority: [p.priority],
             remarks:  [p.remarks],
         });
+        // Seed initial progress preview
+        const initExp = calculateExpectedProgress(p.start, p.end);
+        this.expectedPreview.set(initExp);
+        this.progressPreview.set(p.physical ?? 0);
+        this.progressCategory.set(classifyProjectStatus(p.physical ?? 0, initExp, p.end));
+
+        // Live preview as user edits
+        this.progSub?.unsubscribe();
+        this.progSub = this.editForm.valueChanges.subscribe(v => {
+            const pct  = Math.min(100, Math.max(0, Number(v.physical) || 0));
+            const exp  = calculateExpectedProgress(v.start || p.start, v.end || p.end);
+            this.progressPreview.set(pct);
+            this.expectedPreview.set(exp);
+            this.progressCategory.set(classifyProjectStatus(pct, exp, v.end || p.end));
+        });
+
         this.saveError.set(null);
         this.isEditMode.set(true);
     }
 
     cancelEdit(): void {
+        this.progSub?.unsubscribe();
+        this.progSub = null;
         this.isEditMode.set(false);
     }
 
@@ -106,13 +147,17 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         this.saveError.set(null);
         try {
             const v = this.editForm.value;
+            const physical = Number(v.physical);
+            const expProgress = calculateExpectedProgress(v.start, v.end);
             const updates: Omit<Project, 'id'> = {
                 name: v.name, dept: v.dept, loc: v.loc,
                 cost: Number(v.cost), spent: Number(v.spent),
-                physical: Number(v.physical),
+                physical,
                 status: v.status, start: v.start, end: v.end,
                 priority: v.priority ?? false,
                 remarks: v.remarks ?? '',
+                expectedProgress: expProgress,
+                statusCategory: classifyProjectStatus(physical, expProgress, v.end),
             };
             if (this.isFirestoreDoc()) {
                 await this.firestoreService.updateProject(this.projectId, updates);
@@ -122,6 +167,8 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
                 await this.firestoreService.setProject(this.projectId, { ...current, ...updates });
                 this.isFirestoreDoc.set(true);
             }
+            this.progSub?.unsubscribe();
+            this.progSub = null;
             this.isEditMode.set(false);
         } catch (err) {
             this.saveError.set('Failed to save. Please try again.');
@@ -156,6 +203,23 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         this.router.navigate(['/dhamnagar-dashboard/dashboard']);
     }
 
+    // ── Photo management ──────────────────────────────────────────────────
+    async onPhotosChanged(newPhotos: string[]): Promise<void> {
+        this.photoSaveError.set(null);
+        try {
+            if (this.isFirestoreDoc()) {
+                await this.firestoreService.updateProject(this.projectId, { photos: newPhotos });
+            } else {
+                const current = this.project()!;
+                await this.firestoreService.setProject(this.projectId, { ...current, photos: newPhotos });
+                this.isFirestoreDoc.set(true);
+            }
+        } catch (err) {
+            console.error('Failed to save photo URLs:', err);
+            this.photoSaveError.set('Failed to save photo changes. Please try again.');
+        }
+    }
+
     getStatusClass(status: string): string {
         switch (status) {
             case 'Completed':   return 'bg-green-100 text-green-800';
@@ -166,6 +230,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.progSub?.unsubscribe();
         this.destroy$.next();
         this.destroy$.complete();
     }
